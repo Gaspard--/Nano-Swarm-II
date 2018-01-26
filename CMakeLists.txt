@@ -61,7 +61,8 @@ if (WIN32)
                         C:/glfw-3.2.1.bin.WIN32/lib-vc2015/glfw3.lib
                         C:/freetype-windows-binaries-2.7.1/win32/freetype271.lib
                         C:/freetype-windows-binaries-2.7.1/win32/freetype271MT.lib
-                        C:/SFML-2.4.2/build/lib/Release/sfml-audio.lib
+#                        C:/SFML-2.4.2/build/lib/Release/sfml-audio.lib
+			C:/SFML-2.4.2/lib/sfml-audio.lib
                         opengl32.lib
   )
 else()
