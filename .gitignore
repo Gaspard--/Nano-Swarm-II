@@ -45,3 +45,15 @@ source/gl3w.c
 # Emacs backup files aand locks
 *~
 #*
+
+# By MeixDev -- Visual Studio and CMake
+*.vcxproj
+*.vcxproj.filters
+*.sln
+.vs
+CMakeFiles/
+Debug/
+Win32/
+CMakeCache.txt
+cmake_install.cmake
+Nano-Swarm-II.dir/
