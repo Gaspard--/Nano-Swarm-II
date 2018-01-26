@@ -3,6 +3,7 @@
 #define NOMINMAX
 #include <memory>
 #include <cmath>
+#include <array>
 #include "claws/Vect.hpp"
 #include "RenderContext.hpp"
 #include "my_opengl.hpp"
