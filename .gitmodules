@@ -1,0 +1,3 @@
+[submodule "include/claws"]
+	path = include/claws
+	url = git@github.com:Gaspard--/claws.git
