@@ -6,4 +6,6 @@ struct DisplayInfo
 {
   std::unordered_map<GLuint, std::vector<Renderable>> renderables;
   std::unordered_map<GLuint, std::vector<EntityRenderable>> entityRenderables;
+  std::string time;
+  std::string score;
 };

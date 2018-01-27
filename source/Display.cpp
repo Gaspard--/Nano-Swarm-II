@@ -228,7 +228,15 @@ void Display::render()
 
 void Display::displayInterface()
 {
-  displayText("LA LA LA", 256, {0.075f, 0.075f}, {-0.95f / dim[0], -0.80f}, {1.0f, 0.0f}, {1.0f, 1.0f, 1.0f});
+	//displayRect(Rect(claws::Vect( 0.8, 0.8 ), { 0.1, 0.1 }, { 0.0, 0.0, 0.9, 0.5 }));
+	displayRenderableAsHUD({ claws::Vect<2u, float>(0.0f, 0.0f),
+		claws::Vect<2u, float>(1.0f, 1.0f),
+		claws::Vect<2u, float>(0.0f, 0.0f),
+		claws::Vect<2u, float>(1.0f, 1.0f) },
+		textureHandler[TextureHandler::TextureList::TEST]);
+
+
+	displayText(displayInfo.time, 256, { 0.075f, 0.075f }, { 0.8f, 0.8f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f });
 }
 
 void Display::copyRenderData(Logic const &logic)
