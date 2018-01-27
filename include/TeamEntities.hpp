@@ -3,10 +3,17 @@
 #include "TextureHandler.hpp"
 #include "NanoBot.hpp"
 
+template<class Base, bool team>
+class TeamEntity : public Base
+{
+  using Base::Base;
+};
+
+template<bool team>
 struct  TeamEntities
 {
-  std::vector<NanoBot> units;
-  std::vector<Battery> batteries;
+  std::vector<TeamEntity<NanoBot, team>> units;
+  std::vector<TeamEntity<Battery, team>> batteries;
 
   TeamEntities() = default;
   ~TeamEntities() = default;

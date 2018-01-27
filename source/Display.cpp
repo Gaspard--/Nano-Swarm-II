@@ -241,17 +241,17 @@ void Display::displayInterface()
 
 void Display::copyRenderData(Logic const &logic)
 {
-  auto renderEntity = [this](auto entity)
+  auto renderEntity = [this](auto const &entity)
     {
-      displayInfo.entityRenderables[this.textureHandler.getTexture(entity.getTexture())]
-      .push_back({{0.0f, 0.0f}, {1.0f, 1.0f}, fixture.pos, {1.0f, 0.0f}});
+      displayInfo.entityRenderables[textureHandler.getTexture(entity.getTexture())]
+      .push_back({{0.0f, 0.0f}, {1.0f, 1.0f}, static_cast<claws::Vect<2u, float>>(entity.fixture.pos), {1.0f, 0.0f}});
     };
 
   displayInfo.entityRenderables.clear();
   displayInfo.entityRenderables[textureHandler.getTexture(TextureHandler::TextureList::BOMB_SPRITE)]
     .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
-  logic.getEntityManager().allies.iterOnTeam(renderEntity, textureHandler);
-  logic.getEntityManager().ennemies.iterOnTeam(renderEntity, textureHandler);
+  logic.getEntityManager().allies.iterOnTeam(renderEntity);
+  logic.getEntityManager().ennemies.iterOnTeam(renderEntity);
 }
 
 bool Display::isRunning() const

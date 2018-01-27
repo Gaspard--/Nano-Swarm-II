@@ -76,17 +76,17 @@ public:
 
   void copyRenderData(Logic const &);
 
-  static claws::Vect<2u, float> rotate(claws::Vect<2u, float> a, claws::Vect<2u, float> b)
+  static claws::Vect<2u, float> rotate(claws::Vect<2u, float> a, claws::Vect<2u, float> b) noexcept
   {
     return {a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]};
   }
 
-  auto getCorner(Renderable const &renderable, claws::Vect<2u, float> corner) const
+  auto getCorner(Renderable const &renderable, claws::Vect<2u, float> corner) const noexcept
   {
     return renderable.destPos + ((corner - claws::Vect<2u, float>{0.5f, 0.0f}) * renderable.destSize);
   }
 
-  auto getCorner(EntityRenderable const &renderable, claws::Vect<2u, float> corner) const
+  auto getCorner(EntityRenderable const &renderable, claws::Vect<2u, float> corner) const noexcept
   {
     return renderable.destPos + rotate((corner - claws::Vect<2u, float>{0.5f, 0.5f}), renderable.rotation) * renderable.getRadius();
   }

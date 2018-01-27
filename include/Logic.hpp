@@ -31,7 +31,6 @@ private:
   bool tutoPage;
   bool startPage;
   bool running;
-  EntityManager em;
   std::vector<Laser> lasers;
 
   claws::Vect<2u, double> mousePos;

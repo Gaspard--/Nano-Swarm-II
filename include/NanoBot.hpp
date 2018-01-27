@@ -31,5 +31,6 @@ public:
   void bruteAction(CollisionContainer &, Logic &);
   void shooterAction(CollisionContainer &, Logic &);
   void bomberAction(CollisionContainer &, Logic &);
-  Texture getTexture() const;
+
+  TextureHandler::TextureList getTexture() const noexcept;
 };

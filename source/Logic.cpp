@@ -1,5 +1,7 @@
 #include <thread>
 #include <mutex>
+#include <set>
+#include <unordered_set>
 
 #include "Logic.hpp"
 #include "Input.hpp"
@@ -19,8 +21,42 @@ Logic::Logic(bool animation)
   entityManager.allies.units[0].fixture.pos = {-0.5, 0.5};
 }
 
+template<class... T>
+struct Collisions
+{
+  template<class U>
+  using Set = std::set<U *>;
+
+  template<class U>
+  using Map = std::unordered_map<U *, std::tuple<Set<T>...>>;
+
+  using Container = std::tuple<Map<T>...>;
+};
+
 void Logic::update()
 {
+  // auto updateEntity([](auto &unit)
+  // 		    {
+  // 		      unit.update();
+  // 		    });
+  // entityManager.allies.iterOnTeam(updateEntity);
+  // entityManager.ennemies.iterOnTeam(updateEntity);
+  using Collisions = Collisions<TeamEntity<NanoBot, true>, TeamEntity<NanoBot, false>, TeamEntity<Battery, true>,  TeamEntity<Battery, false>, Battery>;
+
+  Collisions::Container container;
+
+  auto submitCollision([&container](auto &a, auto &b)
+		       {
+			 using A = std::remove_reference_t<decltype(a)>;
+			 using B = std::remove_reference_t<decltype(b)>;
+
+			 std::get<Collisions::Set<B>>(std::get<Collisions::Map<A>>(container)[&a]).emplace(&b);
+		       });
+
+  makePhysics(submitCollision).checkCollision(entityManager.allies.units, entityManager.allies.batteries,
+					      entityManager.ennemies.units, entityManager.ennemies.batteries,
+					      entityManager.pylones);
+  
 }
 
 void Logic::tick(std::mutex &lock)

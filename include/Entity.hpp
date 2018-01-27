@@ -5,10 +5,14 @@
 class Entity
 {
 public:
-  static constexpr double PROPAG_RANGE = 5.0;
+  static constexpr double PROPAG_RANGE = 0.05;
   Fixture fixture;
   bool dead;
 
-  Entity();
+  constexpr Entity() noexcept
+    : dead(false)
+  {
+  }
+
   ~Entity() = default;
 };
