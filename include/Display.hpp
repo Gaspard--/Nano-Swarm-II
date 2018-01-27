@@ -81,85 +81,54 @@ public:
     return {a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]};
   }
 
+  auto getCorner(Renderable const &renderable, claws::Vect<2u, float> corner) const
+  {
+    return renderable.destPos + ((corner - claws::Vect<2u, float>{0.5f, 0.0f}) * renderable.destSize);
+  }
+
+  auto getCorner(EntityRenderable const &renderable, claws::Vect<2u, float> corner) const
+  {
+    return renderable.destPos + rotate((corner - claws::Vect<2u, float>{0.5f, 0.5f}), renderable.rotation) * renderable.radius;
+  }
+
   template<class IT>
   void displayRenderables(IT begin, GLuint count, GLuint texture)
   {
     using T = std::remove_const_t<std::remove_reference_t<decltype(*begin)>>;
-    if constexpr (std::is_same_v<T, Renderable>)
+    Bind<RenderContext> bind(textureContext);
+    GLuint bufferSize(count * 4u * 6u);
+    std::unique_ptr<float[]> buffer(new float[bufferSize]);
+
+    for (std::size_t i(0u); i != count; ++i)
       {
-	Bind<RenderContext> bind(textureContext);
-	GLuint bufferSize(count * 4u * 6u);
-	std::unique_ptr<float[]> buffer(new float[bufferSize]);
+	auto renderable(*begin);
 
-	for (std::size_t i(0u); i != count; ++i)
+	for (unsigned int j(0u); j != 6u; ++j)
 	  {
-	    auto renderable(*begin);
+	    constexpr std::array<claws::Vect<2u, float>, 6u> const corners
+	    {
+	      claws::Vect<2u, float>{0.0f, 0.0f},
+		claws::Vect<2u, float>{1.0f, 0.0f},
+		  claws::Vect<2u, float>{0.0f, 1.0f},
+		    claws::Vect<2u, float>{0.0f, 1.0f},
+		      claws::Vect<2u, float>{1.0f, 0.0f},
+			claws::Vect<2u, float>{1.0f, 1.0f}
+	    };
+	    claws::Vect<2u, float> const corner(corners[j]);
+	    claws::Vect<2u, float> const sourceCorner(renderable.sourcePos + corner * renderable.sourceSize);
+	    claws::Vect<2u, float> const destCorner(getCorner(renderable, corner));
 
-	    for (unsigned int j(0u); j != 6u; ++j)
-	      {
-		constexpr std::array<claws::Vect<2u, float>, 6u> const corners
-		{
-		  claws::Vect<2u, float>{0.0f, 0.0f},
-		    claws::Vect<2u, float>{1.0f, 0.0f},
-		      claws::Vect<2u, float>{0.0f, 1.0f},
-			claws::Vect<2u, float>{0.0f, 1.0f},
-			  claws::Vect<2u, float>{1.0f, 0.0f},
-			    claws::Vect<2u, float>{1.0f, 1.0f}
-		};
-		claws::Vect<2u, float> const corner(corners[j]);
-		claws::Vect<2u, float> const sourceCorner(renderable.sourcePos + corner * renderable.sourceSize);
-		claws::Vect<2u, float> const destCorner(renderable.destPos + ((corner - claws::Vect<2u, float>{0.5f, 0.0f}) * renderable.destSize));
-
-		std::copy(&sourceCorner[0u], &sourceCorner[2u], &buffer[(j + i * 6u) * 4u]);
-		std::copy(&destCorner[0u], &destCorner[2u], &buffer[(j + i * 6u) * 4u + 2u]);
-	      }
-	    ++begin;
+	    std::copy(&sourceCorner[0u], &sourceCorner[2u], &buffer[(j + i * 6u) * 4u]);
+	    std::copy(&destCorner[0u], &destCorner[2u], &buffer[(j + i * 6u) * 4u + 2u]);
 	  }
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
-	my_opengl::setUniform(dim, "dim", textureContext.program);
-	my_opengl::setUniform(0u, "tex", textureContext.program);
-	glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(float), buffer.get(), GL_STATIC_DRAW);
-	glDrawArrays(GL_TRIANGLES, 0, 6 * count);
+	++begin;
       }
-    else if constexpr (std::is_same_v<T, EntityRenderable>)
-      {
-	Bind<RenderContext> bind(textureContext);
-	GLuint bufferSize(count * 4u * 6u);
-	std::unique_ptr<float[]> buffer(new float[bufferSize]);
-
-	for (std::size_t i(0u); i != count; ++i)
-	  {
-	    auto renderable(*begin);
-
-	    for (unsigned int j(0u); j != 6u; ++j)
-	      {
-		constexpr std::array<claws::Vect<2u, float>, 6u> const corners
-		{
-		  claws::Vect<2u, float>{0.0f, 0.0f},
-		    claws::Vect<2u, float>{1.0f, 0.0f},
-		      claws::Vect<2u, float>{0.0f, 1.0f},
-			claws::Vect<2u, float>{0.0f, 1.0f},
-			  claws::Vect<2u, float>{1.0f, 0.0f},
-			    claws::Vect<2u, float>{1.0f, 1.0f}
-		};
-		claws::Vect<2u, float> const corner(corners[j]);
-		claws::Vect<2u, float> const sourceCorner(renderable.sourcePos + corner * renderable.sourceSize);
-		claws::Vect<2u, float> const destCorner(renderable.destPos + rotate((corner - claws::Vect<2u, float>{0.5f, 0.5f}), renderable.rotation) * renderable.radius);
-
-		std::copy(&sourceCorner[0u], &sourceCorner[2u], &buffer[(j + i * 6u) * 4u]);
-		std::copy(&destCorner[0u], &destCorner[2u], &buffer[(j + i * 6u) * 4u + 2u]);
-	      }
-	    ++begin;
-	  }
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
-	my_opengl::setUniform(dim, "dim", textureContext.program);
-	my_opengl::setUniform(0u, "tex", textureContext.program);
-	glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(float), buffer.get(), GL_STATIC_DRAW);
-	glDrawArrays(GL_TRIANGLES, 0, 6 * count);
-      }
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
+    my_opengl::setUniform(dim, "dim", textureContext.program);
+    my_opengl::setUniform(0u, "tex", textureContext.program);
+    glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(float), buffer.get(), GL_STATIC_DRAW);
+    glDrawArrays(GL_TRIANGLES, 0, 6 * count);
   }
 };
