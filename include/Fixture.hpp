@@ -6,7 +6,7 @@ struct Fixture
 {
   static constexpr double getRadius() noexcept
   {
-    return 0.05;
+    return 0.01;
   }
 
   claws::Vect<2u, double> pos;

@@ -17,9 +17,13 @@ Logic::Logic(bool animation)
   restart = false;
   gameOver = false;
   multiplier = 0;
-  entityManager.allies.units.emplace_back(NanoBot::Type::BRUTE);
-  entityManager.allies.units[0].fixture.pos = {-0.5, 0.5};
-  entityManager.allies.units[0].fixture.speed = {-0.0005, 0.0005};
+  for (std::size_t i(0ul); i < 10ul; ++i)
+    for (std::size_t j(0ul); j < 10ul; ++j)
+      {
+	entityManager.allies.units.emplace_back(NanoBot::Type::BRUTE);
+	entityManager.allies.units[i * 10 + j].fixture.pos = {0.1 * static_cast<double>(i) - 0.5, 0.1 * static_cast<double>(j) - 0.5};
+	entityManager.allies.units[i * 10 + j].fixture.speed = {0.0, 0.0};
+      }
 }
 
 template<class... T>
