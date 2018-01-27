@@ -1,5 +1,4 @@
-#ifndef ENTITYMANAGER_HPP_
-# define ENTITYMANAGER_HPP_
+#pragma once
 
 #include <vector>
 #include "Entity.hpp"
@@ -20,5 +19,3 @@ public:
 
 private:
 };
-
-#endif //!ENTITYMANAGER_HPP_

@@ -1,5 +1,4 @@
-#ifndef ENTITY_HPP_
-# define ENTITY_HPP_
+#pragma once
 
 class Entity
 {
@@ -7,5 +6,3 @@ public:
   Entity();
   ~Entity() = default;
 };
-
-#endif //!ENTITY_HPP_

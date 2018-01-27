@@ -1,5 +1,4 @@
-#ifndef BATTERY_HPP_
-# define BATTERY_HPP_
+#pragma once
 
 #include "Entity.hpp"
 
@@ -9,5 +8,3 @@ public:
   Battery();
   ~Battery() = default;
 };
-
-#endif //!BATTERY_HPP_
