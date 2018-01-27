@@ -11,6 +11,7 @@ public:
     MELEE,
     FARMER,
     SHOOTER,
+    BATTERY,
   };
 
   static constexpr double RANGE = 5.0;
