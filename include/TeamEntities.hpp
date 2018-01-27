@@ -1,10 +1,11 @@
 #pragma once
 
 #include "TextureHandler.hpp"
+#include "NanoBot.hpp"
 
 struct  TeamEntities
 {
-  std::vector<Entity> units;
+  std::vector<NanoBot> units;
   std::vector<Battery> batteries;
 
   TeamEntities() = default;
