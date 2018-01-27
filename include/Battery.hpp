@@ -4,7 +4,10 @@
 
 class Battery : public Entity
 {
+private:
+  int power;
+
 public:
-  Battery();
+  Battery(int power=100);
   ~Battery() = default;
 };

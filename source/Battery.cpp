@@ -1,5 +1,6 @@
 #include "Battery.hpp"
 
-Battery::Battery()
+Battery::Battery(int power)
+  : power(power)
 {
 }

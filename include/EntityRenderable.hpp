@@ -1,5 +1,7 @@
 #pragma once
 
+#include "claws/Vect.hpp"
+
 struct EntityRenderable
 {
   static constexpr auto radius{0.1};
