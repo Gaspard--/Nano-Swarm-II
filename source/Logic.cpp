@@ -16,6 +16,8 @@ Logic::Logic(bool animation)
   gameOver = false;
   combo = 0;
   multiplier = 0;
+  entityManager.allies.units.emplace_back(NanoBot::Type::BRUTE);
+  entityManager.allies.units[0].fixture.pos = {-0.5, 0.5};
 }
 
 void Logic::update()
@@ -39,6 +41,7 @@ void Logic::tick(std::mutex &lock)
     std::lock_guard<std::mutex> scopedLock(lock);
     update();
   }
+
 }
 
 void Logic::addToScore(int add)

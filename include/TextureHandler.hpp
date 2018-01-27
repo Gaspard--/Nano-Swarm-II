@@ -50,6 +50,10 @@ public :
 	HIGH_FIVE,
 	BATTERY,
 	UNIT,
+	WORKER,
+	BRUTE,
+	SHOOTER,
+	BOMBER,
 	};
 
   static TextureHandler& getInstance();

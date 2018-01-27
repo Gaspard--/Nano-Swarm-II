@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include "Entity.hpp"
+#include "TextureHandler.hpp"
 
 class Logic;
 
@@ -30,4 +31,5 @@ public:
   void bruteAction(CollisionContainer &, Logic &);
   void shooterAction(CollisionContainer &, Logic &);
   void bomberAction(CollisionContainer &, Logic &);
+  Texture getTexture() const;
 };

@@ -1,25 +1,26 @@
 #pragma once
 
 #include "TextureHandler.hpp"
+#include "NanoBot.hpp"
 
 struct  TeamEntities
 {
-  std::vector<Entity> units;
+  std::vector<NanoBot> units;
   std::vector<Battery> batteries;
 
   TeamEntities() = default;
   ~TeamEntities() = default;
 
   template<class Lambda>
-  void iterOnTeam(Lambda lambda, TextureHandler const &textureHandler)
+  void iterOnTeam(Lambda lambda)
   {
     for (auto &&it : units)
       {
-	lambda(textureHandler.getTexture(TextureHandler::TextureList::UNIT));
+	lambda(it);
       }
     for (auto &&it : batteries)
       {
-	lambda(textureHandler.getTexture(TextureHandler::TextureList::BATTERY));
+	lambda(it);
       }
   }
 };

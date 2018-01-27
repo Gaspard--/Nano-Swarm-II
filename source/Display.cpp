@@ -233,10 +233,10 @@ void Display::displayInterface()
 
 void Display::copyRenderData(Logic const &logic)
 {
-  auto renderEntity = [this](Texture texture)
+  auto renderEntity = [this](auto entity)
     {
-      displayInfo.entityRenderables[texture]
-      .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
+      displayInfo.entityRenderables[this.textureHandler.getTexture(entity.getTexture())]
+      .push_back({{0.0f, 0.0f}, {1.0f, 1.0f}, fixture.pos, {1.0f, 0.0f}});
     };
 
   displayInfo.entityRenderables.clear();
