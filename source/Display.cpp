@@ -5,7 +5,6 @@
 #include <iostream>
 #include "Display.hpp"
 #include "Bind.hpp"
-#include "TextureHandler.hpp"
 
 #include <cstring>
 #include <cerrno>
@@ -68,7 +67,6 @@ Display::Display()
   , size{0.0f, 0.0f}
   , dim{0.0f, 0.0f}
 {
-  TextureHandler::initTextureHandler();
   static auto setFrameBuffer =
     [this] (int width, int height)
     {
@@ -114,7 +112,6 @@ Display::Display()
 
 Display::~Display()
 {
-  TextureHandler::destroyTextureHandler();
 }
 
 GLFWwindow *Display::getWindow() const {
@@ -215,7 +212,7 @@ void Display::render()
   float scale(0.0f);
   glClearColor(scale, scale, scale, scale);
   glClearDepth(1.0f);
-  
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -240,7 +237,7 @@ void Display::displayInterface()
 void Display::copyRenderData(Logic const &logic)
 {
   displayInfo.entityRenderables.clear();
-  displayInfo.entityRenderables[TextureHandler::getInstance().getTexture(TextureHandler::TextureList::BOMB_SPRITE)].push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
+  displayInfo.entityRenderables[textureHandler.getTexture(TextureHandler::TextureList::BOMB_SPRITE)].push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
 }
 
 bool Display::isRunning() const

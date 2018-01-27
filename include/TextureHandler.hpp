@@ -8,6 +8,8 @@
 class TextureHandler
 {
 public :
+  TextureHandler();
+  ~TextureHandler() = default;
 
   enum class TextureList : std::size_t
     {
@@ -48,16 +50,13 @@ public :
       HIGH_FIVE
     };
 
-  static void initTextureHandler();
   static TextureHandler& getInstance();
-  static void destroyTextureHandler();
 
   void addTexture(TextureList, std::string const&);
   Texture getTexture(TextureList) const;
 
 private:
 
-  TextureHandler();
   static std::unique_ptr<TextureHandler> _instance;
   std::map<TextureList, Texture> _textures;
 };

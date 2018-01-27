@@ -16,6 +16,7 @@
 #include "Renderable.hpp"
 #include "EntityRenderable.hpp"
 #include "DisplayInfo.hpp"
+#include "TextureHandler.hpp"
 
 class Display
 {
@@ -46,6 +47,8 @@ private:
   claws::Vect<2u, float> dim;
 
   DisplayInfo displayInfo;
+
+  TextureHandler textureHandler;
 
 public:
   Display();
