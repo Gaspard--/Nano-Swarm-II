@@ -16,11 +16,11 @@ struct  TeamEntities
   {
     for (auto &&it : units)
       {
-	lambda(textureHandler.getTexture(TextureHandler::TextureList::UNIT));
+	lambda(textureHandler.getTexture(TextureHandler::TextureList::UNIT), it.fixture);
       }
     for (auto &&it : batteries)
       {
-	lambda(textureHandler.getTexture(TextureHandler::TextureList::BATTERY));
+	lambda(textureHandler.getTexture(TextureHandler::TextureList::BATTERY), it.fixture);
       }
   }
 };

@@ -2,7 +2,7 @@
 
 struct Camera
 {
-  claws::Vect<2u, double> offset{50.0, 50.0};
+  claws::Vect<2u, double> offset{0.0, 0.0};
   claws::Vect<2u, float> zoom{0.5f, 0.37f};
 
   template<class T>
