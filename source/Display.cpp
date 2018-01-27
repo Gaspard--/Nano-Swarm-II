@@ -45,25 +45,6 @@ Display::GlfwContext::~GlfwContext()
   glfwTerminate();
 }
 
-// void Display::resetPlanet()
-// {
-//     glBindFramebuffer(GL_FRAMEBUFFER, planetRenderTexture.framebuffer);
-//     glViewport(0, 0, 1024, 1024);
-//     glClearColor(0.2, 0.2, 0.5, 0.2);
-//     glClear(GL_COLOR_BUFFER_BIT);
-//     glEnable(GL_BLEND);
-//     {
-//       claws::Vect<2u, float> olddim(dim);
-
-//       dim = {1.0, 1.0};
-//       displayPlanet(planet, 2.0, {1.0, 0.0});
-//       dim = olddim;
-//     }
-//     glDisable(GL_BLEND);
-//     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//     glViewport(0, 0, size[0], size[1]);
-// }
-
 Display::Display()
   : camera{}
   , window([this]{
@@ -87,6 +68,7 @@ Display::Display()
   , size{0.0f, 0.0f}
   , dim{0.0f, 0.0f}
 {
+  TextureHandler::initTextureHandler();
   static auto setFrameBuffer =
     [this] (int width, int height)
     {
@@ -132,15 +114,11 @@ Display::Display()
 
 Display::~Display()
 {
+  TextureHandler::destroyTextureHandler();
 }
 
 GLFWwindow *Display::getWindow() const {
   return window.get();
-}
-
-static claws::Vect<2u, float> rotate(claws::Vect<2u, float> a, claws::Vect<2u, float> b)
-{
-  return {a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]};
 }
 
 void Display::displayText(std::string const &text, unsigned int fontSize, claws::Vect<2u, float> step, claws::Vect<2u, float> textPos, claws::Vect<2u, float> rotation, claws::Vect<3u, float> color)
@@ -237,17 +215,18 @@ void Display::render()
   float scale(0.0f);
   glClearColor(scale, scale, scale, scale);
   glClearDepth(1.0f);
-  glEnable(GL_DEPTH_TEST);
   
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
   glDepthFunc(GL_LESS);
+  for (auto const &renderables : displayInfo.entityRenderables) {
+    displayRenderables(renderables.second.begin(), static_cast<GLuint>(renderables.second.size()), renderables.first);
+  }
   for (auto const &renderables : displayInfo.renderables) {
     displayRenderables(renderables.second.begin(), static_cast<GLuint>(renderables.second.size()), renderables.first);
   }
-  glDisable(GL_DEPTH_TEST);
   displayInterface();
   glDisable(GL_BLEND);
   glfwSwapBuffers(window.get());
@@ -260,6 +239,8 @@ void Display::displayInterface()
 
 void Display::copyRenderData(Logic const &logic)
 {
+  displayInfo.entityRenderables.clear();
+  displayInfo.entityRenderables[TextureHandler::getInstance().getTexture(TextureHandler::TextureList::BOMB_SPRITE)].push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
 }
 
 bool Display::isRunning() const

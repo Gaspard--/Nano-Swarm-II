@@ -4,17 +4,20 @@
 #include "Entity.hpp"
 #include "Battery.hpp"
 
+typedef struct	TeamEntities
+{
+  std::vector<Entity> mobs;
+  std::vector<Battery> batteries;
+}		Team;
+
 class	EntityManager
 {
 public:
   EntityManager();
   ~EntityManager() = default;
-  std::vector<Entity> allies;
-  std::vector<Battery> batteriesA;
 
-  std::vector<Entity> ennemies;
-  std::vector<Battery> batteriesE;
-
+  TeamEntities allies;
+  TeamEntities ennemies;
   std::vector<Battery> pylones;
 
 private:
