@@ -184,7 +184,7 @@ void Display::displayRect(Rect const &rect)
 void Display::displayRenderableAsHUD(Renderable const& renderable, GLuint texture)
 {
   Bind<RenderContext> bind(textureContext);
-  float buffer[5u * 4u];
+  float buffer[4u * 4u];
   claws::Vect<2u, float> const up(renderable.destPos.normalized());
 
   for (unsigned int j(0u); j != 4u; ++j)
@@ -193,9 +193,8 @@ void Display::displayRenderableAsHUD(Renderable const& renderable, GLuint textur
       claws::Vect<2u, float> const sourceCorner(renderable.sourcePos + corner * renderable.sourceSize);
       claws::Vect<2u, float> const destCorner(renderable.destPos + (corner * renderable.destSize));
 
-      std::copy(&sourceCorner[0u], &sourceCorner[2u], &buffer[j * 5u]);
-      std::copy(&destCorner[0u], &destCorner[2u], &buffer[j * 5u + 2u]);
-      buffer[j * 5u + 4u] = renderable.depth;
+      std::copy(&sourceCorner[0u], &sourceCorner[2u], &buffer[j * 4u]);
+      std::copy(&destCorner[0u], &destCorner[2u], &buffer[j * 4u + 2u]);
     }
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, texture);
