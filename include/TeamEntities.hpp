@@ -12,15 +12,15 @@ struct  TeamEntities
   ~TeamEntities() = default;
 
   template<class Lambda>
-  void iterOnTeam(Lambda lambda, TextureHandler const &textureHandler)
+  void iterOnTeam(Lambda lambda)
   {
     for (auto &&it : units)
       {
-	lambda(textureHandler.getTexture(TextureHandler::TextureList::UNIT), it.fixture);
+	lambda(it);
       }
     for (auto &&it : batteries)
       {
-	lambda(textureHandler.getTexture(TextureHandler::TextureList::BATTERY), it.fixture);
+	lambda(it);
       }
   }
 };
