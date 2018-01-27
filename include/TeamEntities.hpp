@@ -15,7 +15,7 @@ struct TeamEntity : public Base
 };
 
 template<bool team>
-struct  TeamEntities
+struct TeamEntities
 {
   std::vector<TeamEntity<NanoBot, team>> units;
   std::vector<TeamEntity<Battery, team>> batteries;

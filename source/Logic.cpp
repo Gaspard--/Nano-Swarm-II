@@ -244,9 +244,9 @@ void Logic::selectBots()
 void Logic::selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> end)
 {
   std::cout << "select rect" << std::endl;
-  auto& allies = entityManager.allies.units;
-  std::cout << allies.size() << std::endl;
-  std::for_each(allies.begin(), allies.end(), [start, end](NanoBot& bot){
+  auto& allies = entityManager.allies;
+  std::cout << allies.units.size() << std::endl;
+  std::for_each(allies.units.begin(), allies.units.end(), [start, end](NanoBot& bot){
       // std::cout << bot.fixture.pos.x() << " "
       // 		<< bot.fixture.pos.y() << " "
       // 		<< start.x() << " "
@@ -262,5 +262,15 @@ void Logic::selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> en
 	}
       else
 	bot.setSelection(false);
+    });
+  std::for_each(allies.batteries.begin(), allies.batteries.end(), [start, end](Battery& battery){
+      if (battery.fixture.pos.x() >= start.x() && battery.fixture.pos.x() <= end.x() &&
+	  battery.fixture.pos.y() >= start.y() && battery.fixture.pos.y() <= end.y())
+	{
+	  std::cout << "selected" << std::endl;
+	  battery.setSelection(true);
+	}
+      else
+	battery.setSelection(false);
     });
 }
