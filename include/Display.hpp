@@ -88,7 +88,7 @@ public:
 
   auto getCorner(EntityRenderable const &renderable, claws::Vect<2u, float> corner) const
   {
-    return renderable.destPos + rotate((corner - claws::Vect<2u, float>{0.5f, 0.5f}), renderable.rotation) * renderable.radius;
+    return renderable.destPos + rotate((corner - claws::Vect<2u, float>{0.5f, 0.5f}), renderable.rotation) * renderable.getRadius();
   }
 
   template<class IT>

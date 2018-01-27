@@ -58,6 +58,7 @@ public:
   void resetCombo();
   void incCombo();
 
+  EntityManager	getEntityManager(void) const;
   claws::Vect<2, double> getPlayerPos(void) const;
   claws::Vect<2u, double> getMouse(Display const &) const;
   long unsigned int  getScore(void) const;
