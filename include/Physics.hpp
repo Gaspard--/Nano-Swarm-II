@@ -22,8 +22,8 @@ private:
     return std::accumulate(++copy, std::get<First>(end), start, [](auto minmax, auto const &elem) {
 	for (std::size_t i(0ul); i != 2ul; ++i)
 	  {
-	    minmax.first[i] = std::min(minmax.first[i], elem.pos[i]);
-	    minmax.second[i] = std::max(minmax.second[i], elem.pos[i]);
+	    minmax.first[i] = std::min(minmax.first[i], elem->pos[i]);
+	    minmax.second[i] = std::max(minmax.second[i], elem->pos[i]);
 	  }
 	return minmax;
       });
@@ -53,7 +53,7 @@ private:
 				  {
 				    for (auto it1(begin1); it1 < end1; ++it1)
 				      for (auto it2(begin2); it2 < end2; ++it2)
-					solver(*it1, *it2);
+					solver(**it1, **it2);
 				  });
 		       (void)expander{check(begin, end, std::get<It>(otherBegins), std::get<It>(otherEnds))...};
 		     });
@@ -73,10 +73,10 @@ private:
     for (std::size_t i(0ul); i != 2ul; ++i)
       {
 	auto isBelow([mid, i](auto const &a){
-	      return a->pos[i] + a->radius > a->mid[i];
+	    return a->pos[i] + a->getRadius() > a->mid[i];
 	  });
 	auto isAbove([mid, i](auto const &a){
-	      return a->pos[i] - a->radius < a->mid[i];
+	    return a->pos[i] - a->getRadius() < a->mid[i];
 	  });
 	for (auto pred : {isBelow, isAbove})
 	  checkCollisionImpl(begin, {std::partition(std::get<It>(begin), std::get<It>(end), pred)...});
