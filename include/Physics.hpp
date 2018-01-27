@@ -44,7 +44,10 @@ private:
 				  {
 				    for (auto it1(begin1); it1 < end1; ++it1)
 				      for (auto it2(begin2); it2 < end2; ++it2)
-					solver(**it1, **it2);
+					if (((*it1)->fixture.pos - (*it2)->fixture.pos).length2() <
+					    (*it1)->fixture.getRadius() * (*it1)->fixture.getRadius() +
+					    (*it2)->fixture.getRadius() * (*it2)->fixture.getRadius())
+					  solver(**it1, **it2);
 				  });
 		       (void)expander{(check(begin, end, std::get<It>(otherBegins), std::get<It>(otherEnds)), 0)...};
 		     });
