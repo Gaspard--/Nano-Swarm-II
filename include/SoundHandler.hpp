@@ -37,7 +37,7 @@ private:
   static std::unique_ptr<SoundHandler> _instance;
 
   sf::Music mainMusic;
-  std::map<SoundList, sf::SoundBuffer*> _sound;
+  std::map<SoundList, std::unique_ptr<sf::SoundBuffer>> _sound;
   std::vector<std::unique_ptr<sf::Sound>> _soundsPlaying;
 };
 

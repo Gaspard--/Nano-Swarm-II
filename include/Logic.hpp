@@ -74,7 +74,6 @@ public:
 
   EntityManager	getEntityManager(void) const;
   claws::Vect<2, double> getPlayerPos(void) const;
-  claws::Vect<2u, double> getMouse(Display const &) const;
   std::string	getScore(void) const;
   std::string	getTime(void) const;
   bool          getGameOver(void) const;
