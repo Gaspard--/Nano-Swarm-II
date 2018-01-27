@@ -24,7 +24,6 @@ private:
 
   unsigned int time;
   long unsigned int score;
-  unsigned int combo;
   double multiplier;
 
   bool restart;
@@ -58,8 +57,6 @@ public:
   void update();
   void tick(std::mutex &lock);
   void addToScore(int);
-  void resetCombo();
-  void incCombo();
 
   template<class... Args>
   void addLaser(Args &&...args)
@@ -70,9 +67,8 @@ public:
   EntityManager	getEntityManager(void) const;
   claws::Vect<2, double> getPlayerPos(void) const;
   claws::Vect<2u, double> getMouse(Display const &) const;
-  long unsigned int  getScore(void) const;
-  std::string   getTime(void) const;
-  std::string   getCombo(void) const;
+  std::string	getScore(void) const;
+  std::string	getTime(void) const;
   bool          getGameOver(void) const;
   bool          getRestart(void) const;
   bool          getStartPage(void) const;

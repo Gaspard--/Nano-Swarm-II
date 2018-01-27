@@ -14,7 +14,6 @@ Logic::Logic(bool animation)
   score = 0;
   restart = false;
   gameOver = false;
-  combo = 0;
   multiplier = 0;
   entityManager.allies.units.emplace_back(NanoBot::Type::BRUTE);
   entityManager.allies.units[0].fixture.pos = {-0.5, 0.5};
@@ -46,29 +45,12 @@ void Logic::tick(std::mutex &lock)
 
 void Logic::addToScore(int add)
 {
-  score += static_cast<int>(combo * add * (multiplier == 0 ? 1 : multiplier));
+  score += static_cast<int>(add * (multiplier == 0 ? 1 : multiplier));
 }
 
-void Logic::incCombo()
+std::string Logic::getScore(void) const
 {
-  combo++;
-}
-
-void Logic::resetCombo()
-{
-  combo = 0;
-}
-
-long unsigned int Logic::getScore(void) const
-{
-  return score;
-}
-
-std::string Logic::getCombo(void) const
-{
-  if (combo < 2)
-    return "";
-  return "x" + std::to_string(combo);
+  return ("score = " + std::to_string(score));
 }
 
 EntityManager Logic::getEntityManager(void) const

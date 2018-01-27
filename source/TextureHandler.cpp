@@ -39,6 +39,7 @@ TextureHandler::TextureHandler()
   addTexture(TextureList::HIGH_FIVE, "resources/HighFive.bmp");
   addTexture(TextureList::BATTERY, "resources/Battery.bmp");
   addTexture(TextureList::UNIT, "resources/Unit.bmp");
+  addTexture(TextureList::TEST, "resources/Shooter.bmp");
 }
 
 void TextureHandler::addTexture(TextureList id, std::string const& path)
