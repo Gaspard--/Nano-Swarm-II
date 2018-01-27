@@ -1,25 +1,14 @@
 #pragma once
 
-#include "EntityRenderable.hpp"
+#include "Fixture.hpp"
 
 class Entity
 {
 public:
-  enum class Type
-  {
-    BOMBER,
-    MELEE,
-    FARMER,
-    SHOOTER,
-    BATTERY,
-  };
+  static constexpr double PROPAG_RANGE = 5.0;
+  Fixture fixture;
+  bool dead;
 
-  static constexpr double RANGE = 5.0;
-  Type type;
-  EntityRenderable renderable;
-
-  Entity(Type type);
+  Entity();
   ~Entity() = default;
-
-  void shooter();
 };
