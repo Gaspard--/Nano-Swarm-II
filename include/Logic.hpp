@@ -55,6 +55,7 @@ public:
 
   void handleEvent(Display const &, Event const& event);
   void checkEvents(Display const &);
+  void selectRect(Vect<2u, double>, Vect<2u, double>, Vect<4u, bool>);
   void update();
   void tick(std::mutex &lock);
   void addToScore(int);

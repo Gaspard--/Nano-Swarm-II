@@ -1,6 +1,5 @@
 #include <thread>
 #include <mutex>
-
 #include "Logic.hpp"
 #include "Input.hpp"
 #include "Display.hpp"
@@ -124,6 +123,8 @@ void Logic::handleKey(GLFWwindow *window, Key key)
 
 void Logic::checkEvents(Display const &display)
 {
+  if (display.isKeyPressed(GLFW_KEY_SPACE))
+    selectAllBots();
 }
 
 void Logic::handleMouse(Display const &display, GLFWwindow *, Mouse mouse)
@@ -161,4 +162,27 @@ bool Logic::getRestart(void) const
 bool Logic::getGameOver(void) const
 {
   return gameOver;
+}
+
+
+void Logic::selectRect(Vect<2u, double> start, Vect<2u, double> end, Vect<4u, bool> keyPressed)
+{
+  std::vector<Entities> allUnits;
+  // selectedBots.clear();
+  allUnits.insert(allUnits.end(), em.allies.units.begin(), em.alliers.units.end());
+  allUnits.insert(allUnits.end(), em.allies.batteries.begin(), em.allies.batteries.end());
+  std::for_each(em.allies.units.begin(), nanoBots.end(), [this, start, end, keyPressed](NanoBot *bot){
+      if (bot->isAlly())
+	{
+	  if (bot->getPos().x() >= start.x() && bot->getPos().x() <= end.x() &&
+	      bot->getPos().y() >= start.y() && bot->getPos().y() <= end.y() &&
+	      (keyPressed == Vect<4u, bool>(false, false, false, false) || keyPressed[bot->getType()]))
+	    {
+	      bot->setSelection(true);
+	      selectedBots.push_back(bot);
+	    }
+	  else
+	    bot->setSelection(false);
+	}
+    });
 }

@@ -1,6 +1,7 @@
 #include <functional>
 #include "Input.hpp"
 
+Vect<2u, double> pos(0, 0);
 Input Input::instance = Input();
 
 void Input::setWindow(GLFWwindow *window)
@@ -13,7 +14,7 @@ void Input::setWindow(GLFWwindow *window)
 	  ev.type = Event::KEY;
 	  ev.val.key = { key, scancode, action, mode };
 	  // = { true, Event::KEY, window, {.key = {key, scancode, action, mode}} };
-      Input::instance._events.push(ev);
+	  Input::instance._events.push(ev);
     });
   glfwSetCursorPosCallback(window, [] (GLFWwindow *window, double x, double y) {
 	  Event ev;
@@ -21,7 +22,8 @@ void Input::setWindow(GLFWwindow *window)
 	  ev.window = window;
 	  ev.type = Event::MOUSE;
 	  ev.val.key = { static_cast<int>(x), static_cast<int>(y), 0, 0 };
-	  // Event ev = {true, Event::MOUSE, window, {.mouse = {x, y}}};
+	  pos = screenToGame({x, y});
+      	  // Event ev = {true, Event::MOUSE, window, {.mouse = {x, y}}};
       Input::instance._events.push(ev);
     });
   glfwSetMouseButtonCallback(window, [] (GLFWwindow *window, int button, int action, int mods) {
@@ -49,4 +51,9 @@ Event Input::pollEvent()
   Input::instance._events.pop();
 
   return event;
+}
+
+Vect<2u, double> Input::screenToGame(Vect<2u, double> pos)
+{
+  return (pos - Vect<2u, double>(WIDTH - HEIGHT, 0) * 0.5) / Vect<2u, double>(HEIGHT * 0.5, -HEIGHT * 0.5) + Vect<2u, double>(-1.0, 1.0);
 }
