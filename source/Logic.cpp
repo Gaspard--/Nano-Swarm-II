@@ -19,6 +19,7 @@ Logic::Logic(bool animation)
   multiplier = 0;
   entityManager.allies.units.emplace_back(NanoBot::Type::BRUTE);
   entityManager.allies.units[0].fixture.pos = {-0.5, 0.5};
+  entityManager.allies.units[0].fixture.speed = {-0.0005, 0.0005};
 }
 
 template<class... T>
@@ -35,14 +36,6 @@ struct Collisions
 
 void Logic::update()
 {
-  auto updateEntity([](auto &unit)
-  		    {
-  		      unit.fixture.pos += unit.fixture.speed;
-  		    });
-
-  entityManager.allies.iterOnTeam(updateEntity);
-  entityManager.ennemies.iterOnTeam(updateEntity);
-
   using Collisions = Collisions<TeamEntity<NanoBot, true>, TeamEntity<NanoBot, false>, TeamEntity<Battery, true>,  TeamEntity<Battery, false>, Battery>;
 
   Collisions::Container container;
@@ -57,28 +50,58 @@ void Logic::update()
   makePhysics(submitCollision).checkCollision(entityManager.allies.units, entityManager.allies.batteries,
 					      entityManager.ennemies.units, entityManager.ennemies.batteries,
 					      entityManager.pylones);
-  
+  auto updateEntity([&container](auto &unit)
+  		    {
+		      constexpr double const maxAccel(0.002);
+		      using UnitType = std::remove_reference_t<decltype(unit)>;
+
+		      auto &near(std::get<Collisions::Map<UnitType>>(container)[&unit]);
+		      claws::Vect<2u, double> dir{0.0, 0.0};
+
+		      auto reactToTeam([&dir, &unit](auto &container)
+				       {
+					 for (auto *ally : container)
+					   {
+					     claws::Vect<2u, double> posDelta(unit.fixture.pos - ally->fixture.pos);
+					     claws::Vect<2u, double> speedDelta(unit.fixture.speed - ally->fixture.speed);
+					     double coef = posDelta.scalar(posDelta) - 0.01;
+					     
+					     coef = coef > 0.01 ? 1 / coef : coef;
+					     dir += speedDelta * 0.005;
+					     dir += posDelta * 0.0001;
+					   }
+				       });
+		      reactToTeam(std::get<Collisions::Set<TeamEntity<NanoBot, UnitType::getTeam()>>>(near));
+		      reactToTeam(std::get<Collisions::Set<TeamEntity<Battery, UnitType::getTeam()>>>(near));
+		      reactToTeam(std::get<Collisions::Set<Battery>>(near));
+		      if (dir.length2() > maxAccel * maxAccel)
+			dir = dir.normalized() * maxAccel;
+		      unit.fixture.speed += dir;
+  		      unit.fixture.pos += unit.fixture.speed;
+  		    });
+
+  entityManager.allies.iterOnTeam(updateEntity);
+  entityManager.ennemies.iterOnTeam(updateEntity);  
 }
 
-void Logic::tick(std::mutex &lock)
-{
-  auto const now(Clock::now());
-
-  if (now > lastUpdate + getTickTime() * 2)
-    {
-      lastUpdate = now;
-      return ;
-    }
-  lastUpdate += getTickTime();
-  if (now < lastUpdate)
-    std::this_thread::sleep_for(lastUpdate - now);
-
+  void Logic::tick(std::mutex &lock)
   {
-    std::lock_guard<std::mutex> scopedLock(lock);
-    update();
-  }
+    auto const now(Clock::now());
 
-}
+    if (now > lastUpdate + getTickTime() * 2)
+      {
+	lastUpdate = now;
+	return ;
+      }
+    lastUpdate += getTickTime();
+    if (now < lastUpdate)
+      std::this_thread::sleep_for(lastUpdate - now);
+
+    {
+      std::lock_guard<std::mutex> scopedLock(lock);
+      update();
+    }
+  }
 
 void Logic::addToScore(int add)
 {
@@ -97,7 +120,7 @@ EntityManager Logic::getEntityManager(void) const
 
 std::string Logic::getTime(void) const
 {
-  auto secondTime((time * getTickTime().count()) / 1000000);
+  std::size_t secondTime((time * getTickTime().count()) / 1000000ul);
   std::string   toReturn;
 
   if (secondTime / 60 >= 10)
