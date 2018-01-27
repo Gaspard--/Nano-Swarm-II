@@ -3,6 +3,7 @@
 
 # include <iostream>
 # include <queue>
+# include "claws/Vect.hpp"
 # include "my_opengl.hpp"
 
 struct Key {
@@ -58,7 +59,7 @@ private:
 
 private:
   static Input instance;
-  std::queue<Event> _events;
+  std::queue<Event> events;
 };
 
 #endif /* !INPUT_HPP_ */

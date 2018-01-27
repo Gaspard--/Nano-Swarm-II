@@ -44,7 +44,10 @@ private:
 				  {
 				    for (auto it1(begin1); it1 < end1; ++it1)
 				      for (auto it2(begin2); it2 < end2; ++it2)
-					solver(**it1, **it2);
+					if (((*it1)->fixture.pos - (*it2)->fixture.pos).length2() <
+					    (*it1)->fixture.getRadius() * (*it1)->fixture.getRadius() +
+					    (*it2)->fixture.getRadius() * (*it2)->fixture.getRadius())
+					  solver(**it1, **it2);
 				  });
 		       (void)expander{(check(begin, end, std::get<It>(otherBegins), std::get<It>(otherEnds)), 0)...};
 		     });
@@ -59,7 +62,7 @@ private:
     std::tie(min, max) = getMinMaxImpl(begin, end);
     claws::Vect<2u, double> mid((min + max) * 0.5);
 
-    if (claws::Vect<sizeof...(It), std::size_t>{static_cast<std::size_t>((std::get<It>(end) - std::get<It>(begin)))...}.sum() < 20ul || level >= 20)
+    if (claws::Vect<sizeof...(It), std::size_t>{static_cast<std::size_t>((std::get<It>(end) - std::get<It>(begin)))...}.sum() < 20ul || level >= 5)
       return classicSolve(begin, end);
     for (std::size_t i(0ul); i != 2ul; ++i)
       {

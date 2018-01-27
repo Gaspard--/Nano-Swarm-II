@@ -11,6 +11,7 @@ struct Fixture
 
   claws::Vect<2u, double> pos;
   claws::Vect<2u, double> speed;
+  claws::Vect<2u, double> target;
 
   constexpr void update() noexcept
   {

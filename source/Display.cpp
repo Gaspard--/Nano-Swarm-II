@@ -18,9 +18,9 @@ inline RenderContext contextFromFiles(std::string name)
 
   if (!fragInput || !vertInput)
   {
-	  std::cout << "shaders/" + name + ".vert" << std::endl;
-	  std::cout << "shaders/" + name + ".frag" << std::endl;
-	  throw std::runtime_error(strerror(errno));
+    std::cout << "shaders/" + name + ".vert" << std::endl;
+    std::cout << "shaders/" + name + ".frag" << std::endl;
+    throw std::runtime_error(strerror(errno));
   }
   vert << vertInput.rdbuf();
   frag << fragInput.rdbuf();
@@ -120,44 +120,43 @@ GLFWwindow *Display::getWindow() const {
 
 void Display::displayText(std::string const &text, unsigned int fontSize, claws::Vect<2u, float> step, claws::Vect<2u, float> textPos, claws::Vect<2u, float> rotation, claws::Vect<3u, float> color)
 {
-  fontHandler.renderText(text, [this, textPos, rotation, color](claws::Vect<2u, float> pen, claws::Vect<2u, float> size, unsigned char *buffer, claws::Vect<2u, int> fontDim)
-                         {
-                           Texture texture;
-                           Bind<RenderContext> bind(textContext);
+  fontHandler.renderText(text, [this, textPos, rotation, color](claws::Vect<2u, float> pen, claws::Vect<2u, float> size, unsigned char *buffer, claws::Vect<2u, int> fontDim) {
+      Texture texture;
+      Bind<RenderContext> bind(textContext);
 
-                           glActiveTexture(GL_TEXTURE0);
-                           glBindTexture(GL_TEXTURE_2D, texture);
-                           glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-                           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                           glTexImage2D(GL_TEXTURE_2D,
-                                        0,
-                                        GL_RED,
-                                        fontDim[0],
-                                        fontDim[1],
-                                        0,
-                                        GL_RED,
-                                        GL_UNSIGNED_BYTE,
-                                        static_cast<void *>(buffer));
-                           float data[16];
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, texture);
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexImage2D(GL_TEXTURE_2D,
+		   0,
+		   GL_RED,
+		   fontDim[0],
+		   fontDim[1],
+		   0,
+		   GL_RED,
+		   GL_UNSIGNED_BYTE,
+		   static_cast<void *>(buffer));
+      float data[16];
 
-                           for (unsigned int i(0); !(i & 4u); ++i)
-                             {
-                               claws::Vect<2u, float> corner{static_cast<float>(i & 1u), static_cast<float>(i >> 1u)};
-                               claws::Vect<2u, float> destCorner(rotate(pen + textPos + corner * size, rotation));
+      for (unsigned int i(0); !(i & 4u); ++i)
+	{
+	  claws::Vect<2u, float> corner{static_cast<float>(i & 1u), static_cast<float>(i >> 1u)};
+	  claws::Vect<2u, float> destCorner(rotate(pen + textPos + corner * size, rotation));
 
-                               data[i * 4 + 0] = corner[0];
-                               data[i * 4 + 1] = 1.0f - corner[1];
-                               data[i * 4 + 2] = destCorner[0];
-                               data[i * 4 + 3] = destCorner[1];
-                             }
-                           glBindBuffer(GL_ARRAY_BUFFER, textBuffer);
-                           glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-                           my_opengl::setUniform(dim, "dim", textContext.program);
-                           my_opengl::setUniform(color, "textColor", textContext.program);
-                           my_opengl::setUniform(0u, "tex", textContext.program);
-                           glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-                         }, fontSize, step);
+	  data[i * 4 + 0] = corner[0];
+	  data[i * 4 + 1] = 1.0f - corner[1];
+	  data[i * 4 + 2] = destCorner[0];
+	  data[i * 4 + 3] = destCorner[1];
+	}
+      glBindBuffer(GL_ARRAY_BUFFER, textBuffer);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+      my_opengl::setUniform(dim, "dim", textContext.program);
+      my_opengl::setUniform(color, "textColor", textContext.program);
+      my_opengl::setUniform(0u, "tex", textContext.program);
+      glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }, fontSize, step);
 }
 
 void Display::displayRect(Rect const &rect)
@@ -228,15 +227,15 @@ void Display::render()
 
 void Display::displayInterface()
 {
-	//displayRect(Rect(claws::Vect( 0.8, 0.8 ), { 0.1, 0.1 }, { 0.0, 0.0, 0.9, 0.5 }));
-	displayRenderableAsHUD({ claws::Vect<2u, float>(0.0f, 0.0f),
-		claws::Vect<2u, float>(1.0f, 1.0f),
-		claws::Vect<2u, float>(0.0f, 0.0f),
-		claws::Vect<2u, float>(1.0f, 1.0f) },
-		textureHandler[TextureHandler::TextureList::TEST]);
+  //displayRect(Rect(claws::Vect( 0.8, 0.8 ), { 0.1, 0.1 }, { 0.0, 0.0, 0.9, 0.5 }));
+  displayRenderableAsHUD({ claws::Vect<2u, float>(0.0f, 0.0f),
+	claws::Vect<2u, float>(1.0f, 1.0f),
+	claws::Vect<2u, float>(0.0f, 0.0f),
+	claws::Vect<2u, float>(1.0f, 1.0f) },
+    textureHandler[TextureHandler::TextureList::TEST]);
 
 
-	displayText(displayInfo.time, 256, { 0.075f, 0.075f }, { 0.8f, 0.8f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f });
+  displayText(displayInfo.time, 256, { 0.075f, 0.075f }, { 0.8f, 0.8f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f });
 }
 
 void Display::copyRenderData(Logic const &logic)
@@ -244,7 +243,7 @@ void Display::copyRenderData(Logic const &logic)
   auto renderEntity = [this](auto const &entity)
     {
       displayInfo.entityRenderables[textureHandler.getTexture(entity.getTexture())]
-      .push_back({{0.0f, 0.0f}, {1.0f, 1.0f}, static_cast<claws::Vect<2u, float>>(entity.fixture.pos), {1.0f, 0.0f}});
+      .push_back({{0.0f, 0.0f}, {1.0f, 1.0f}, static_cast<claws::Vect<2u, float>>(entity.fixture.pos), static_cast<claws::Vect<2u, float>>(entity.fixture.speed.normalized())});
     };
 
   displayInfo.entityRenderables.clear();

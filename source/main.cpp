@@ -2,6 +2,7 @@
 # include "Display.hpp"
 # include "Logic.hpp"
 # include "TextureHandler.hpp"
+# include "SoundHandler.hpp"
 # include "Input.hpp"
 # include <random>
 # include <thread>
@@ -13,9 +14,23 @@ int main()
   try {
     Display display;
 
+		struct SoundHandlerInit
+    {
+      SoundHandlerInit()
+      {
+        SoundHandler::initSoundHandler();
+      }
+
+      ~SoundHandlerInit()
+      {
+        SoundHandler::destroySoundHandler();
+      }
+    } SoundHandlerIniter;
+
     Logic logic;
     Input::setWindow(display.getWindow());
 
+    SoundHandler::getInstance().playMainMusic();
     std::mutex lock;
     std::thread thread([&logic, &display, &lock]()
 		       {
