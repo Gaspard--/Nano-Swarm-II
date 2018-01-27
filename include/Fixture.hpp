@@ -6,11 +6,12 @@ struct Fixture
 {
   static constexpr double getRadius() noexcept
   {
-    return 0.01;
+    return 0.05;
   }
 
   claws::Vect<2u, double> pos;
   claws::Vect<2u, double> speed;
+  claws::Vect<2u, double> target;
 
   constexpr void update() noexcept
   {
