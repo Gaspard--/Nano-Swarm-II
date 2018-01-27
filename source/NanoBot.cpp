@@ -3,7 +3,7 @@
 #include "Logic.hpp"
 
 NanoBot::NanoBot(Type type)
-  : type(type)
+  : selected(false), type(type)
 {
 }
 
@@ -70,4 +70,9 @@ TextureHandler::TextureList NanoBot::getTexture() const noexcept
   //     return TextureHandler::TextureList::UNIT;
   //   }
   return TextureHandler::TextureList::UNIT;
+}
+
+void NanoBot::setSelection(bool isSelected)
+{
+  selected = isSelected;
 }

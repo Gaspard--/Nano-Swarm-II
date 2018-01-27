@@ -15,7 +15,7 @@ private:
 public:
   using CollisionContainer = std::map<Entity *, std::set<Entity *>>;
 
-  enum class Type
+  enum class Type : std::size_t
   {
     WORKER,
     BRUTE,
@@ -23,6 +23,7 @@ public:
     BOMBER,
   };
 
+  bool selected;
   Type type;
 
   NanoBot(Type type);
@@ -31,6 +32,7 @@ public:
   void bruteAction(CollisionContainer &, Logic &);
   void shooterAction(CollisionContainer &, Logic &);
   void bomberAction(CollisionContainer &, Logic &);
+  void setSelection(bool selected);
 
   TextureHandler::TextureList getTexture() const noexcept;
 };

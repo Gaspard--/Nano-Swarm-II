@@ -33,7 +33,12 @@ private:
   bool running;
   std::vector<Laser> lasers;
 
+  // input variables
   claws::Vect<2u, double> mousePos;
+  claws::Vect<2u, double> dragOrigin;
+  // mouse variables
+  bool leftClick;
+  bool rightClick;
 
   static constexpr std::chrono::microseconds const getTickTime()
   {
@@ -47,12 +52,15 @@ private:
   void handleKey(GLFWwindow *window, Key key);
   void handleMouse(Display const &, GLFWwindow *window, Mouse mouse);
   void handleButton(GLFWwindow *window, Button button);
+  void selectBots();
+  void selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> end);
 
 public:
   Logic(bool animation = true);
 
   void handleEvent(Display const &, Event const& event);
   void checkEvents(Display const &);
+  void selectRect(claws::Vect<2u, double>, claws::Vect<2u, double>, claws::Vect<4u, bool>);
   void update();
   void tick(std::mutex &lock);
   void addToScore(int);
