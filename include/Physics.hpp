@@ -62,7 +62,7 @@ private:
     std::tie(min, max) = getMinMaxImpl(begin, end);
     claws::Vect<2u, double> mid((min + max) * 0.5);
 
-    if (claws::Vect<sizeof...(It), std::size_t>{static_cast<std::size_t>((std::get<It>(end) - std::get<It>(begin)))...}.sum() < 20ul || level >= 20)
+    if (claws::Vect<sizeof...(It), std::size_t>{static_cast<std::size_t>((std::get<It>(end) - std::get<It>(begin)))...}.sum() < 20ul || level >= 5)
       return classicSolve(begin, end);
     for (std::size_t i(0ul); i != 2ul; ++i)
       {
