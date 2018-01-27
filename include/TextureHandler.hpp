@@ -13,7 +13,7 @@ public :
 
   enum class TextureList : std::size_t
     {
-      BOYAUX,
+    BOYAUX,
 	PLANET,
 	SWORDRADIUS,
 	BULLET,
@@ -50,12 +50,20 @@ public :
 	HIGH_FIVE,
 	BATTERY,
 	UNIT,
+	WORKER,
+	BRUTE,
+	SHOOTER,
+	BOMBER,
+	countTexture
 	};
 
   static TextureHandler& getInstance();
 
   void addTexture(TextureList, std::string const&);
   Texture getTexture(TextureList) const;
+  const Texture& operator[](TextureList id) {
+	  return _textures.at(id);
+  };
 
 private:
 

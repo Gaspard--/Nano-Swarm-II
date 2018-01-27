@@ -1,5 +1,7 @@
 #include <thread>
 #include <mutex>
+#include <set>
+#include <unordered_set>
 #include "Logic.hpp"
 #include "Input.hpp"
 #include "Display.hpp"
@@ -13,12 +15,48 @@ Logic::Logic(bool animation)
   score = 0;
   restart = false;
   gameOver = false;
-  combo = 0;
   multiplier = 0;
+  entityManager.allies.units.emplace_back(NanoBot::Type::BRUTE);
+  entityManager.allies.units[0].fixture.pos = {-0.5, 0.5};
 }
+
+template<class... T>
+struct Collisions
+{
+  template<class U>
+  using Set = std::set<U *>;
+
+  template<class U>
+  using Map = std::unordered_map<U *, std::tuple<Set<T>...>>;
+
+  using Container = std::tuple<Map<T>...>;
+};
 
 void Logic::update()
 {
+  auto updateEntity([](auto &unit)
+  		    {
+  		      unit.fixture.pos += unit.fixture.speed;
+  		    });
+
+  entityManager.allies.iterOnTeam(updateEntity);
+  entityManager.ennemies.iterOnTeam(updateEntity);
+
+  using Collisions = Collisions<TeamEntity<NanoBot, true>, TeamEntity<NanoBot, false>, TeamEntity<Battery, true>,  TeamEntity<Battery, false>, Battery>;
+
+  Collisions::Container container;
+
+  auto submitCollision([&container](auto &a, auto &b)
+		       {
+			 using A = std::remove_reference_t<decltype(a)>;
+			 using B = std::remove_reference_t<decltype(b)>;
+
+			 std::get<Collisions::Set<B>>(std::get<Collisions::Map<A>>(container)[&a]).emplace(&b);
+		       });
+  makePhysics(submitCollision).checkCollision(entityManager.allies.units, entityManager.allies.batteries,
+					      entityManager.ennemies.units, entityManager.ennemies.batteries,
+					      entityManager.pylones);
+
 }
 
 void Logic::tick(std::mutex &lock)
@@ -38,33 +76,17 @@ void Logic::tick(std::mutex &lock)
     std::lock_guard<std::mutex> scopedLock(lock);
     update();
   }
+
 }
 
 void Logic::addToScore(int add)
 {
-  score += static_cast<int>(combo * add * (multiplier == 0 ? 1 : multiplier));
+  score += static_cast<int>(add * (multiplier == 0 ? 1 : multiplier));
 }
 
-void Logic::incCombo()
+std::string Logic::getScore(void) const
 {
-  combo++;
-}
-
-void Logic::resetCombo()
-{
-  combo = 0;
-}
-
-long unsigned int Logic::getScore(void) const
-{
-  return score;
-}
-
-std::string Logic::getCombo(void) const
-{
-  if (combo < 2)
-    return "";
-  return "x" + std::to_string(combo);
+  return ("score = " + std::to_string(score));
 }
 
 EntityManager Logic::getEntityManager(void) const

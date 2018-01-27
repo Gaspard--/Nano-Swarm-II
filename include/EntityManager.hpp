@@ -12,8 +12,8 @@ public:
   EntityManager();
   ~EntityManager() = default;
 
-  TeamEntities allies;
-  TeamEntities ennemies;
+  TeamEntities<true> allies;
+  TeamEntities<false> ennemies;
   std::vector<Battery> pylones;
 
 private:
