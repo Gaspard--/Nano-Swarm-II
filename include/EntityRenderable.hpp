@@ -2,7 +2,7 @@
 
 struct EntityRenderable
 {
-  static constexpr auto radius{0.1};
+  static constexpr auto radius{0.1f};
   // TEXTURE
   /// bottom left corner of source rect
   claws::Vect<2u, float> sourcePos{0.0f, 0.0f};

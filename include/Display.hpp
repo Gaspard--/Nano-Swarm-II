@@ -73,6 +73,11 @@ public:
 
   void copyRenderData(Logic const &);
 
+  static claws::Vect<2u, float> rotate(claws::Vect<2u, float> a, claws::Vect<2u, float> b)
+  {
+    return {a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]};
+  }
+
   template<class IT>
   void displayRenderables(IT begin, GLuint count, GLuint texture)
   {
@@ -138,7 +143,7 @@ public:
 		};
 		claws::Vect<2u, float> const corner(corners[j]);
 		claws::Vect<2u, float> const sourceCorner(renderable.sourcePos + corner * renderable.sourceSize);
-		claws::Vect<2u, float> const destCorner((renderable.destPos + ((corner - claws::Vect<2u, float>{0.5f, 0.0f})) * renderable.rotation * renderable.radius));
+		claws::Vect<2u, float> const destCorner(renderable.destPos + rotate((corner - claws::Vect<2u, float>{0.5f, 0.5f}), renderable.rotation) * renderable.radius);
 
 		std::copy(&sourceCorner[0u], &sourceCorner[2u], &buffer[(j + i * 6u) * 4u]);
 		std::copy(&destCorner[0u], &destCorner[2u], &buffer[(j + i * 6u) * 4u + 2u]);
@@ -152,6 +157,6 @@ public:
 	my_opengl::setUniform(0u, "tex", textureContext.program);
 	glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(float), buffer.get(), GL_STATIC_DRAW);
 	glDrawArrays(GL_TRIANGLES, 0, 6 * count);
-      }      
+      }
   }
 };
