@@ -68,7 +68,7 @@ Display::Display()
   : camera{}
   , window([this]{
       glfwWindowHint(GLFW_DEPTH_BITS, 1);
-      std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window(glfwCreateWindow(1920, 1080, "ultra-ninja VS falling zombies II", nullptr, nullptr), &glfwDestroyWindow);
+      std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window(glfwCreateWindow(1920, 1080, "Nano Swarm II", nullptr, nullptr), &glfwDestroyWindow);
 
       if (!window)
         throw std::runtime_error("opengl: failed to open window");
