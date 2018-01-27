@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <numeric>
+#include <tuple>
 #include "claws/Vect.hpp"
 
 template<class Solver>
@@ -12,20 +13,13 @@ struct Physics
 private:
   using expander = int[];
 
-  template<class First, class... It>
-  auto getMinMaxImpl(std::tuple<First, It...> begin, std::tuple<First, It...> end)
+  template<class First>
+  auto getMinMaxImpl(std::tuple<First> begin, std::tuple<First> end)
   {
     auto copy(std::get<First>(begin));
-    std::pair<claws::Vect<2u, decltype(*copy)>, claws::Vect<2u, decltype(*copy)>> start;
+    auto start(*copy);
 
-    if constexpr (!sizeof...(It))
-      {
-	start = *copy;
-	++copy;
-      }
-    else
-      start = getMinMaxImpl({std::get<It>(begin)...}, {std::get<It>(end)...});
-    return std::accumulate(copy, std::get<First>(end), start, [](auto minmax, auto const &elem){
+    return std::accumulate(++copy, std::get<First>(end), start, [](auto minmax, auto const &elem) {
 	for (std::size_t i(0ul); i != 2ul; ++i)
 	  {
 	    minmax.first[i] = std::min(minmax.first[i], elem.pos[i]);
@@ -33,6 +27,21 @@ private:
 	  }
 	return minmax;
       });
+  }
+
+  template<class First, class... It>
+  auto getMinMaxImpl(std::tuple<First, It...> begin, std::tuple<First, It...> end)
+  {
+    return std::accumulate(std::get<First>(begin), std::get<First>(end), getMinMaxImpl({std::get<It>(begin)...}, {std::get<It>(end)...}),
+			   [](auto minmax, auto const &elem)
+			   {
+			     for (std::size_t i(0ul); i != 2ul; ++i)
+			       {
+				 minmax.first[i] = std::min(minmax.first[i], elem.pos[i]);
+				 minmax.second[i] = std::max(minmax.second[i], elem.pos[i]);
+			       }
+			     return minmax;
+			   });
   }
 
   template<class... It>
@@ -54,7 +63,9 @@ private:
   template<class... It>
   void checkCollisionImpl(std::tuple<It...> begin, std::tuple<It...> end)
   {
-    auto [min, max] = getMinMaxImpl(begin, end);
+    claws::Vect<2u, double> min;
+    claws::Vect<2u, double> max;
+    std::tie(min, max) = getMinMaxImpl(begin, end);
     claws::Vect<2u, double> mid((min + max) * 0.5);
 
     if (claws::Vect<2u, std::size_t>{(std::get<It>(begin) - std::get<It>(end))...}.sum() < 20)

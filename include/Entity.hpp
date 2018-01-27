@@ -9,12 +9,17 @@ public:
   {
     BOMBER,
     MELEE,
-    FARMER
+    FARMER,
+    SHOOTER,
+    BATTERY,
   };
 
   static constexpr double RANGE = 5.0;
+  Type type;
   EntityRenderable renderable;
 
-  Entity();
+  Entity(Type type);
   ~Entity() = default;
+
+  void shooter();
 };
