@@ -9,6 +9,9 @@
 Logic::Logic(bool animation)
   : running(true),
     mousePos{0.0, 0.0},
+    dragOrigin{0.0, 0.0},
+    leftClick(false),
+    rightClick(false),
     lastUpdate(Clock::now())
 {
   time = 0;
@@ -145,8 +148,8 @@ void Logic::handleKey(GLFWwindow *window, Key key)
 
 void Logic::checkEvents(Display const &display)
 {
-  if (display.isKeyPressed(GLFW_KEY_SPACE))
-    selectAllBots();
+  // if (display.isKeyPressed(GLFW_KEY_SPACE))
+  //   selectAllBots();
 }
 
 void Logic::handleMouse(Display const &display, GLFWwindow *, Mouse mouse)
@@ -166,8 +169,21 @@ claws::Vect<2u, double> Logic::getMouse(Display const &display) const
 
 void Logic::handleButton(GLFWwindow *, Button button)
 {
-  if (button.button != GLFW_MOUSE_BUTTON_LEFT || button.action != GLFW_PRESS || gameOver)
-    return ;
+  // if (button.button != GLFW_MOUSE_BUTTON_LEFT || button.action != GLFW_PRESS || gameOver)
+  //   return ;
+  if (button.button == GLFW_MOUSE_BUTTON_LEFT)
+    {
+      if (button.action == GLFW_PRESS)
+	{
+	  dragOrigin = mousePos;
+	  leftClick = true;
+	}
+      else
+	{
+	  selectBots();
+	  leftClick = false;
+	}
+    }
 }
 
 claws::Vect<2, double> Logic::getPlayerPos(void) const
@@ -186,25 +202,24 @@ bool Logic::getGameOver(void) const
   return gameOver;
 }
 
-
-void Logic::selectRect(Vect<2u, double> start, Vect<2u, double> end, Vect<4u, bool> keyPressed)
+void Logic::selectBots()
 {
-  std::vector<Entities> allUnits;
-  // selectedBots.clear();
-  allUnits.insert(allUnits.end(), em.allies.units.begin(), em.alliers.units.end());
-  allUnits.insert(allUnits.end(), em.allies.batteries.begin(), em.allies.batteries.end());
-  std::for_each(em.allies.units.begin(), nanoBots.end(), [this, start, end, keyPressed](NanoBot *bot){
-      if (bot->isAlly())
+  claws::Vect<2u, double> start(std::min(mousePos.x(), dragOrigin.x()), std::min(mousePos.y(), dragOrigin.y()));
+  claws::Vect<2u, double> end(std::max(mousePos.x(), dragOrigin.x()), std::max(mousePos.y(), dragOrigin.y()));
+  selectRect(start, end);
+}
+
+void Logic::selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> end)
+{
+  std::cout << "select rect" << std::endl;
+  auto& allies = entityManager.allies.units;
+  std::for_each(allies.begin(), allies.end(), [start, end](NanoBot& bot){
+      if (bot.fixture.pos.x() >= start.x() && bot.fixture.pos.x() <= end.x() &&
+	  bot.fixture.pos.y() >= start.y() && bot.fixture.pos.y() <= end.y())
 	{
-	  if (bot->getPos().x() >= start.x() && bot->getPos().x() <= end.x() &&
-	      bot->getPos().y() >= start.y() && bot->getPos().y() <= end.y() &&
-	      (keyPressed == Vect<4u, bool>(false, false, false, false) || keyPressed[bot->getType()]))
-	    {
-	      bot->setSelection(true);
-	      selectedBots.push_back(bot);
-	    }
-	  else
-	    bot->setSelection(false);
+	  bot.setSelection(true);
 	}
+      else
+	bot.setSelection(false);
     });
 }

@@ -3,7 +3,7 @@
 
 # include <iostream>
 # include <queue>
-# include "Vect.hpp"
+# include "claws/Vect.hpp"
 # include "my_opengl.hpp"
 
 struct Key {
@@ -55,14 +55,11 @@ public:
   static bool isKeyPressed(int key);
 
 private:
-  Vect<2u, double> screenToGame(Vect<2u, double> pos);
   Input() = default;
 
 private:
   static Input instance;
-  std::queue<Event> _events;
-  constexpr int WIDTH = 1920;
-  constexpr int HEIGHT = 1080;
+  std::queue<Event> events;
 };
 
 #endif /* !INPUT_HPP_ */
