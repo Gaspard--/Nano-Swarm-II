@@ -8,6 +8,7 @@
 # include <chrono>
 # include <mutex>
 # include "Input.hpp"
+# include "EntityManager.hpp"
 
 class Display;
 
@@ -17,6 +18,8 @@ private:
   using Clock = std::conditional<std::chrono::high_resolution_clock::is_steady,
                                  std::chrono::high_resolution_clock,
                                  std::chrono::steady_clock>::type;
+
+  EntityManager entityManager;
 
   unsigned int time;
   long unsigned int score;
@@ -55,6 +58,7 @@ public:
   void resetCombo();
   void incCombo();
 
+  EntityManager	getEntityManager(void) const;
   claws::Vect<2, double> getPlayerPos(void) const;
   claws::Vect<2u, double> getMouse(Display const &) const;
   long unsigned int  getScore(void) const;
