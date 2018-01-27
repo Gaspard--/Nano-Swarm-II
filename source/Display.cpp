@@ -184,7 +184,7 @@ void Display::displayRect(Rect const &rect)
 void Display::displayRenderableAsHUD(Renderable const& renderable, GLuint texture)
 {
   Bind<RenderContext> bind(textureContext);
-  float buffer[5u * 4u];
+  float buffer[4u * 4u];
   claws::Vect<2u, float> const up(renderable.destPos.normalized());
 
   for (unsigned int j(0u); j != 4u; ++j)
@@ -193,9 +193,8 @@ void Display::displayRenderableAsHUD(Renderable const& renderable, GLuint textur
       claws::Vect<2u, float> const sourceCorner(renderable.sourcePos + corner * renderable.sourceSize);
       claws::Vect<2u, float> const destCorner(renderable.destPos + (corner * renderable.destSize));
 
-      std::copy(&sourceCorner[0u], &sourceCorner[2u], &buffer[j * 5u]);
-      std::copy(&destCorner[0u], &destCorner[2u], &buffer[j * 5u + 2u]);
-      buffer[j * 5u + 4u] = renderable.depth;
+      std::copy(&sourceCorner[0u], &sourceCorner[2u], &buffer[j * 4u]);
+      std::copy(&destCorner[0u], &destCorner[2u], &buffer[j * 4u + 2u]);
     }
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, texture);
@@ -211,13 +210,10 @@ void Display::render()
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   float scale(0.0f);
   glClearColor(scale, scale, scale, scale);
-  glClearDepth(1.0f);
-
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
 
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
-  glDepthFunc(GL_LESS);
   for (auto const &renderables : displayInfo.entityRenderables) {
     displayRenderables(renderables.second.begin(), static_cast<GLuint>(renderables.second.size()), renderables.first);
   }
@@ -232,12 +228,22 @@ void Display::render()
 
 void Display::displayInterface()
 {
+  displayText("LA LA LA", 256, {0.075f, 0.075f}, {-0.95f / dim[0], -0.80f}, {1.0f, 0.0f}, {1.0f, 1.0f, 1.0f});
 }
 
 void Display::copyRenderData(Logic const &logic)
 {
+  auto renderEntity = [this](Texture texture)
+    {
+      displayInfo.entityRenderables[texture]
+      .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
+    };
+
   displayInfo.entityRenderables.clear();
-  displayInfo.entityRenderables[textureHandler.getTexture(TextureHandler::TextureList::BOMB_SPRITE)].push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
+  displayInfo.entityRenderables[textureHandler.getTexture(TextureHandler::TextureList::BOMB_SPRITE)]
+    .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
+  logic.getEntityManager().allies.iterOnTeam(renderEntity, textureHandler);
+  logic.getEntityManager().ennemies.iterOnTeam(renderEntity, textureHandler);
 }
 
 bool Display::isRunning() const

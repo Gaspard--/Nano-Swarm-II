@@ -68,6 +68,11 @@ std::string Logic::getCombo(void) const
   return "x" + std::to_string(combo);
 }
 
+EntityManager Logic::getEntityManager(void) const
+{
+  return entityManager;
+}
+
 std::string Logic::getTime(void) const
 {
   auto secondTime((time * getTickTime().count()) / 1000000);

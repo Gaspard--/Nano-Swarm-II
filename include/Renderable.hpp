@@ -17,8 +17,6 @@ struct Renderable
   claws::Vect<2u, float> destPos{0.0f, 0.0f};
   /// size when displayed
   claws::Vect<2u, float> destSize{0.0f, 0.0f};
-
-  float depth{0.0f};
 };
 
 #endif

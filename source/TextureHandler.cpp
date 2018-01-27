@@ -37,6 +37,8 @@ TextureHandler::TextureHandler()
   addTexture(TextureList::HUMANHEAD, "resources/CitizenHead.bmp");
   addTexture(TextureList::SAVE_ME, "resources/SaveMe.bmp");
   addTexture(TextureList::HIGH_FIVE, "resources/HighFive.bmp");
+  addTexture(TextureList::BATTERY, "resources/Battery.bmp");
+  addTexture(TextureList::UNIT, "resources/Unit.bmp");
 }
 
 void TextureHandler::addTexture(TextureList id, std::string const& path)
