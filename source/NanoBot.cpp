@@ -45,7 +45,7 @@ void NanoBot::bruteAction(CollisionContainer &nearBots, Logic &logic)
 	  && !entity->dead)
 	{
 	  this->cooldown = cooldown;
-	  enitity->dead = true;
+	  entity->dead = true;
 	}
     }
 }
@@ -74,18 +74,18 @@ void NanoBot::bomberAction(CollisionContainer &nearBots, Logic &logic)
 
 TextureHandler::TextureList NanoBot::getTexture() const noexcept
 {
-  // switch (type)
-  //   {
-  //   case Type::WORKER:
-  //     return TextureHandler::TextureList::WORKER;
-  //   case Type::BRUTE:
-  //     return TextureHandler::TextureList::BRUTE;
-  //   case Type::SHOOTER:
-  //     return TextureHandler::TextureList::SHOOTER;
-  //   case Type::BOMBER:
-  //     return TextureHandler::TextureList::BOMBER;
-  //   default:
-  //     return TextureHandler::TextureList::UNIT;
-  //   }
+  switch (type)
+    {
+    case Type::WORKER:
+      return TextureHandler::TextureList::WORKER;
+    case Type::BRUTE:
+      return TextureHandler::TextureList::BRUTE;
+    case Type::SHOOTER:
+      return TextureHandler::TextureList::SHOOTER;
+    case Type::BOMBER:
+      return TextureHandler::TextureList::BOMBER;
+    default:
+      return TextureHandler::TextureList::UNIT;
+    }
   return TextureHandler::TextureList::UNIT;
 }

@@ -12,7 +12,7 @@ public:
   Battery(int power=100);
   ~Battery() = default;
 
-  constexpr auto getTexture() const noexcept
+  auto getTexture() const noexcept
   {
     return TextureHandler::TextureList::BATTERY;
   }
