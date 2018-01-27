@@ -65,7 +65,7 @@ void Logic::update()
 					     claws::Vect<2u, double> posDelta(unit.fixture.pos - ally->fixture.pos);
 					     claws::Vect<2u, double> speedDelta(unit.fixture.speed - ally->fixture.speed);
 					     double coef = posDelta.scalar(posDelta) - 0.01;
-					     
+
 					     coef = coef > 0.01 ? 1 / coef : coef;
 					     dir += speedDelta * 0.005;
 					     dir += posDelta * 0.0001;
@@ -81,7 +81,7 @@ void Logic::update()
   		    });
 
   entityManager.allies.iterOnTeam(updateEntity);
-  entityManager.ennemies.iterOnTeam(updateEntity);  
+  entityManager.ennemies.iterOnTeam(updateEntity);
 }
 
   void Logic::tick(std::mutex &lock)

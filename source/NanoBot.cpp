@@ -41,6 +41,12 @@ void NanoBot::bruteAction(CollisionContainer &nearBots, Logic &logic)
 
   for (auto &entity : nearBots[this])
     {
+      if (std::sqrt((fixture.pos - entity->fixture.pos).length2()) < attackRange
+	  && !entity->dead)
+	{
+	  this->cooldown = cooldown;
+	  enitity->dead = true;
+	}
     }
 }
 
@@ -51,6 +57,18 @@ void NanoBot::bomberAction(CollisionContainer &nearBots, Logic &logic)
 
   for (auto &entity : nearBots[this])
     {
+      if (std::sqrt((fixture.pos - entity->fixture.pos).length2()) < attackRange
+	  && !entity->dead)
+	{
+	  for (auto &toKill : nearBots[this])
+	    {
+	      if (std::sqrt((fixture.pos - entity->fixture.pos).length2()) < explosionRange
+		  && !toKill->dead)
+		toKill->dead = true;
+	    }
+	  this->dead = true;
+	  return;
+	}
     }
 }
 
