@@ -20,6 +20,8 @@ private:
                                  std::chrono::high_resolution_clock,
                                  std::chrono::steady_clock>::type;
 
+  EntityManager entityManager;
+
   unsigned int time;
   long unsigned int score;
   unsigned int combo;
@@ -65,6 +67,7 @@ public:
     lasers.emplace_back(std::forward<Args>(args)...);
   }
 
+  EntityManager	getEntityManager(void) const;
   claws::Vect<2, double> getPlayerPos(void) const;
   claws::Vect<2u, double> getMouse(Display const &) const;
   long unsigned int  getScore(void) const;
