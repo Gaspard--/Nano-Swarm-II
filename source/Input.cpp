@@ -19,7 +19,7 @@ void Input::setWindow(GLFWwindow *window)
       ev.hasEvent = true;
       ev.window = window;
       ev.type = Event::MOUSE;
-      ev.val.key = { static_cast<int>(x), static_cast<int>(y), 0, 0 };
+      ev.val.mouse = { x, y };
       Input::instance.events.push(ev);
     });
   glfwSetMouseButtonCallback(window, [] (GLFWwindow *window, int button, int action, int mods) {

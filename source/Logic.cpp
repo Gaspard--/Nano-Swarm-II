@@ -231,6 +231,11 @@ bool Logic::getGameOver(void) const
 
 void Logic::selectBots()
 {
+  // std::cout << mousePos.x() << " "
+  // 	    << mousePos.y() << " "
+  // 	    << dragOrigin.x() << " "
+  // 	    << dragOrigin.y() << " "
+  // 	    << std::endl;
   claws::Vect<2u, double> start(std::min(mousePos.x(), dragOrigin.x()), std::min(mousePos.y(), dragOrigin.y()));
   claws::Vect<2u, double> end(std::max(mousePos.x(), dragOrigin.x()), std::max(mousePos.y(), dragOrigin.y()));
   selectRect(start, end);
@@ -240,10 +245,19 @@ void Logic::selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> en
 {
   std::cout << "select rect" << std::endl;
   auto& allies = entityManager.allies.units;
+  std::cout << allies.size() << std::endl;
   std::for_each(allies.begin(), allies.end(), [start, end](NanoBot& bot){
+      // std::cout << bot.fixture.pos.x() << " "
+      // 		<< bot.fixture.pos.y() << " "
+      // 		<< start.x() << " "
+      // 		<< start.y() << " "
+      // 		<< end.x() << " "
+      // 		<< end.y() << " "
+      // 		<< std::endl;
       if (bot.fixture.pos.x() >= start.x() && bot.fixture.pos.x() <= end.x() &&
 	  bot.fixture.pos.y() >= start.y() && bot.fixture.pos.y() <= end.y())
 	{
+	  std::cout << "selected" << std::endl;
 	  bot.setSelection(true);
 	}
       else

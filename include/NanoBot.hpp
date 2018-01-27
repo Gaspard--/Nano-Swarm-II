@@ -11,7 +11,6 @@ class NanoBot : public Entity
 {
 private:
   unsigned int cooldown;
-  bool selected;
 
 public:
   using CollisionContainer = std::map<Entity *, std::set<Entity *>>;
@@ -24,6 +23,7 @@ public:
     BOMBER,
   };
 
+  bool selected;
   Type type;
 
   NanoBot(Type type);
