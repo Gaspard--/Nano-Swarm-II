@@ -107,10 +107,8 @@ Display::Display()
     glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(0, 2, GL_FLOAT, false, 5 * sizeof(float), nullptr);
-    glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * sizeof(float), reinterpret_cast<void *>(2u * sizeof(float)));
-    glVertexAttribPointer(2, 1, GL_FLOAT, false, 5 * sizeof(float), reinterpret_cast<void *>(4u * sizeof(float)));
+    glVertexAttribPointer(glGetAttribLocation(textureContext.program, "coord"), 2, GL_FLOAT, false, 4 * sizeof(float), nullptr);
+    glVertexAttribPointer(glGetAttribLocation(textureContext.program, "pos"), 2, GL_FLOAT, false, 4 * sizeof(float), reinterpret_cast<void *>(2u * sizeof(float)));
   }
   {
     Bind<RenderContext> bind(rectContext);
@@ -118,7 +116,7 @@ Display::Display()
     glBindBuffer(GL_ARRAY_BUFFER, rectBuffer);
     glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * sizeof(float), nullptr);
+    glVertexAttribPointer(glGetAttribLocation(textContext.program, "pos"), 2, GL_FLOAT, false, 2 * sizeof(float), nullptr);
   }
   {
     Bind<RenderContext> bind(textContext);
@@ -127,8 +125,8 @@ Display::Display()
     glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * sizeof(float), nullptr);
-    glVertexAttribPointer(1, 2, GL_FLOAT, false, 4 * sizeof(float), reinterpret_cast<void *>(2u * sizeof(float)));
+    glVertexAttribPointer(glGetAttribLocation(textContext.program, "coord"), 2, GL_FLOAT, false, 4 * sizeof(float), nullptr);
+    glVertexAttribPointer(glGetAttribLocation(textContext.program, "pos"), 2, GL_FLOAT, false, 4 * sizeof(float), reinterpret_cast<void *>(2u * sizeof(float)));
   }
 }
 
