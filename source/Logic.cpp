@@ -62,7 +62,7 @@ void Logic::update()
 		      {
 			constexpr double const maxAccel = 0.001;
 			claws::Vect<2u, double> delta(unit.fixture.target - unit.fixture.pos);
-			
+
 			if (delta.length2() > maxAccel * maxAccel)
 			  delta = delta.normalized() * maxAccel;
 			unit.fixture.speed += delta;
@@ -123,7 +123,7 @@ void Logic::moveSelection(claws::Vect<2u, double> target)
     });
   entityManager.allies.iterOnTeam(update);
   // std::for_each(entityManager.allies.units.begin(), entityManager.allies.units.end(), update);
-  // std::for_each(entityManager.allies.batteries.begin(), entityManager.allies.batteries.end(), update); 
+  // std::for_each(entityManager.allies.batteries.begin(), entityManager.allies.batteries.end(), update);
 }
 
 void Logic::tick(std::mutex &lock)
@@ -242,6 +242,19 @@ void Logic::handleButton(GLFWwindow *, Button button)
 	{
 	  selectBots();
 	  leftClick = false;
+	}
+    }
+  // RIGHT BUTTON
+  else if (button.button == GLFW_MOUSE_BUTTON_RIGHT)
+    {
+      if (button.action == GLFW_PRESS)
+	{
+	  rightClick = true;
+	  moveSelection(mousePos);
+	}
+      else
+	{
+	  rightClick = false;
 	}
     }
 }
