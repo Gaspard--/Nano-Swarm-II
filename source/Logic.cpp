@@ -184,14 +184,11 @@ void Logic::handleMouse(Display const &display, GLFWwindow *, Mouse mouse)
   claws::Vect<2u, float> const size(display.getSize());
 
   mousePos = {mouse.x, mouse.y};
+  mousePos *= 2.0;
   mousePos -= claws::Vect<2u, double>(size[0] - size[1], 0.0);
   mousePos /= claws::Vect<2u, double>(size[1], -size[1]);
   mousePos += claws::Vect<2u, double>(-1.0, 1.0);
-}
-
-claws::Vect<2u, double> Logic::getMouse(Display const &display) const
-{
-  return display.getCamera().unapply(mousePos);
+  // return display.getCamera().unapply(mousePos);
 }
 
 void Logic::handleButton(GLFWwindow *, Button button)
@@ -231,11 +228,6 @@ bool Logic::getGameOver(void) const
 
 void Logic::selectBots()
 {
-  // std::cout << mousePos.x() << " "
-  // 	    << mousePos.y() << " "
-  // 	    << dragOrigin.x() << " "
-  // 	    << dragOrigin.y() << " "
-  // 	    << std::endl;
   claws::Vect<2u, double> start(std::min(mousePos.x(), dragOrigin.x()), std::min(mousePos.y(), dragOrigin.y()));
   claws::Vect<2u, double> end(std::max(mousePos.x(), dragOrigin.x()), std::max(mousePos.y(), dragOrigin.y()));
   selectRect(start, end);
@@ -243,21 +235,11 @@ void Logic::selectBots()
 
 void Logic::selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> end)
 {
-  std::cout << "select rect" << std::endl;
   auto& allies = entityManager.allies;
-  std::cout << allies.units.size() << std::endl;
   std::for_each(allies.units.begin(), allies.units.end(), [start, end](NanoBot& bot){
-      // std::cout << bot.fixture.pos.x() << " "
-      // 		<< bot.fixture.pos.y() << " "
-      // 		<< start.x() << " "
-      // 		<< start.y() << " "
-      // 		<< end.x() << " "
-      // 		<< end.y() << " "
-      // 		<< std::endl;
       if (bot.fixture.pos.x() >= start.x() && bot.fixture.pos.x() <= end.x() &&
 	  bot.fixture.pos.y() >= start.y() && bot.fixture.pos.y() <= end.y())
 	{
-	  std::cout << "selected" << std::endl;
 	  bot.setSelection(true);
 	}
       else
@@ -267,7 +249,6 @@ void Logic::selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> en
       if (battery.fixture.pos.x() >= start.x() && battery.fixture.pos.x() <= end.x() &&
 	  battery.fixture.pos.y() >= start.y() && battery.fixture.pos.y() <= end.y())
 	{
-	  std::cout << "selected" << std::endl;
 	  battery.setSelection(true);
 	}
       else
