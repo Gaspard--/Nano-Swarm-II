@@ -35,12 +35,14 @@ struct Collisions
 
 void Logic::update()
 {
-  // auto updateEntity([](auto &unit)
-  // 		    {
-  // 		      unit.update();
-  // 		    });
-  // entityManager.allies.iterOnTeam(updateEntity);
-  // entityManager.ennemies.iterOnTeam(updateEntity);
+  auto updateEntity([](auto &unit)
+  		    {
+  		      unit.fixture.pos += unit.fixture.speed;
+  		    });
+
+  entityManager.allies.iterOnTeam(updateEntity);
+  entityManager.ennemies.iterOnTeam(updateEntity);
+
   using Collisions = Collisions<TeamEntity<NanoBot, true>, TeamEntity<NanoBot, false>, TeamEntity<Battery, true>,  TeamEntity<Battery, false>, Battery>;
 
   Collisions::Container container;
@@ -52,7 +54,6 @@ void Logic::update()
 
 			 std::get<Collisions::Set<B>>(std::get<Collisions::Map<A>>(container)[&a]).emplace(&b);
 		       });
-
   makePhysics(submitCollision).checkCollision(entityManager.allies.units, entityManager.allies.batteries,
 					      entityManager.ennemies.units, entityManager.ennemies.batteries,
 					      entityManager.pylones);
