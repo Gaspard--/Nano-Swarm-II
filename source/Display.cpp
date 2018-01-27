@@ -210,13 +210,10 @@ void Display::render()
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   float scale(0.0f);
   glClearColor(scale, scale, scale, scale);
-  glClearDepth(1.0f);
-
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
 
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
-  glDepthFunc(GL_LESS);
   for (auto const &renderables : displayInfo.entityRenderables) {
     displayRenderables(renderables.second.begin(), static_cast<GLuint>(renderables.second.size()), renderables.first);
   }
@@ -231,6 +228,7 @@ void Display::render()
 
 void Display::displayInterface()
 {
+  displayText("LA LA LA", 256, {0.075f, 0.075f}, {-0.95f / dim[0], -0.80f}, {1.0f, 0.0f}, {1.0f, 1.0f, 1.0f});
 }
 
 void Display::copyRenderData(Logic const &logic)
