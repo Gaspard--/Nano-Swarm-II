@@ -60,11 +60,11 @@ void SoundHandler::deleteSounds()
 
 void SoundHandler::addSoundBuffer(SoundList id, std::string const& path)
 {
-  _instance->_sound[id] = new sf::SoundBuffer();
+  _instance->_sound[id] = std::make_unique<sf::SoundBuffer>();
   _instance->_sound[id]->loadFromFile(path);
 }
 
 sf::SoundBuffer* SoundHandler::getSoundBuffer(SoundList id) const
 {
-  return (_instance->_sound[id]);
+  return (_instance->_sound[id].get());
 }
