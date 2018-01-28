@@ -119,6 +119,12 @@ void Logic::update(Camera const &camera)
     updateEntity(TaggedIndex<TeamEntity<Battery, false>>(i), entityManager.ennemies.batteries[i], container, access);
   // for (unsigned short i(0u); i < entityManager.ennemies.batteries.size(); ++i)
   //   updateEntity(TaggedIndex<TeamEntity<Battery, false>>(i), entityManager.allies.batteries[i], updateEntity);
+  auto update([](Entity &unit){
+      unit.fixture.speed *= 0.9;
+      unit.fixture.pos += unit.fixture.speed;
+    });
+  entityManager.allies.iterOnTeam(update);
+  entityManager.ennemies.iterOnTeam(update);
 }
 
 void Logic::moveSelection(claws::Vect<2u, double> target)

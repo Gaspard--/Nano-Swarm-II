@@ -217,8 +217,7 @@ public:
 	  }
       if (dir.length2() > maxAccel * maxAccel)
 	dir = dir.normalized() * maxAccel;
-      (unit.fixture.speed += dir) *= 0.90;
-      unit.fixture.pos += unit.fixture.speed;
+      (unit.fixture.speed += dir);
     }
     {
       constexpr double const maxAccel = 0.001;
