@@ -16,7 +16,7 @@ private:
 public:
   using CollisionContainer = std::map<Entity *, std::set<Entity *>>;
 
-  enum class Type : std::size_t
+  enum Type : std::size_t
   {
     WORKER,
     BRUTE,

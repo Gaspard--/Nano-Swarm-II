@@ -15,7 +15,8 @@ Logic::Logic(bool animation)
     mousePos{0.0, 0.0},
     dragOrigin{0.0, 0.0},
     leftClick(false),
-    rightClick(false)
+    rightClick(false),
+    selectedTypes{{false, false, false, false, false}}
 {
   timer = 0;
   score = 0;
@@ -132,8 +133,12 @@ static void clearTuple(T &tuple)
 	       });
 }
 
-void Logic::update(Camera const &camera)
+void Logic::update(Display &display)
 {
+  unsigned int tick = 0;
+  if (++tick > 60)
+    tick = 0;
+
   struct Access
   {
     Logic &logic;
@@ -232,6 +237,8 @@ void Logic::update(Camera const &camera)
     updateEntity(TaggedIndex<TeamEntity<Battery, false>>(i));
   for (unsigned short i(0u); i < entityManager.ennemies.units.size(); ++i)
     updateEntity(TaggedIndex<TeamEntity<NanoBot, false>>(i));
+
+  checkEvents(display, tick);
 }
 
 void Logic::moveSelection(claws::Vect<2u, double> target)
@@ -260,7 +267,7 @@ void Logic::moveSelection(claws::Vect<2u, double> target)
   entityManager.allies.iterOnTeam(update);
 }
 
-void Logic::tick(std::mutex &lock, Camera const &camera)
+void Logic::tick(std::mutex &lock, Display& display)
 {
   auto const now(Clock::now());
 
@@ -271,7 +278,7 @@ void Logic::tick(std::mutex &lock, Camera const &camera)
     }
   {
     std::lock_guard<std::mutex> scopedLock(lock);
-    update(camera);
+    update(display);
     lastUpdate += getTickTime();
   }
   if (now < lastUpdate)
@@ -321,7 +328,7 @@ void Logic::handleEvent(Display const &display, Event const& event)
       switch (event.type)
         {
         case Event::KEY:
-          handleKey(event.window, event.val.key);
+          handleKey(display, event.window, event.val.key);
           break;
         case Event::MOUSE:
           handleMouse(display, event.window, event.val.mouse);
@@ -335,26 +342,38 @@ void Logic::handleEvent(Display const &display, Event const& event)
     }
 }
 
-void Logic::handleKey(GLFWwindow *window, Key key)
+void Logic::handleKey(Display const& display, GLFWwindow *window, Key key)
 {
   switch (key.key)
     {
     case GLFW_KEY_ESCAPE:
       glfwSetWindowShouldClose(window, true);
       break;
+    case GLFW_KEY_1 ... GLFW_KEY_5:
+      if (key.action == GLFW_PRESS)
+	{
+	  selectedTypes[key.key - GLFW_KEY_1] = true;
+	}
+      else if (key.action == GLFW_RELEASE)
+	{
+	  selectedTypes[key.key - GLFW_KEY_1] = false;
+	}
+      if (leftClick)
+      	selectBots(display);
+      else
+	refreshSelection();
+      break;
     default:
       break;
     }
 }
 
-void Logic::checkEvents(Display const &display)
+void Logic::checkEvents(Display const &display, unsigned tick)
 {
-  // if (display.isKeyPressed(GLFW_KEY_SPACE))
-  //   selectAllBots();
   if (rightClick)
-    {
-      moveSelection(getMousePos(display));
-    }
+    moveSelection(getMousePos(display));
+  if (display.isKeyPressed(GLFW_KEY_SPACE))
+    selectAllBots();
 }
 
 void Logic::handleMouse(Display const &display, GLFWwindow *, Mouse mouse)
@@ -415,6 +434,36 @@ bool Logic::getGameOver(void) const
   return gameOver;
 }
 
+void Logic::refreshSelection()
+{
+  auto& allies = entityManager.allies;
+  for (auto& bot : allies.units)
+    {
+      if (selectedTypes != std::array<bool, 5>{{false, false, false, false, false}} &&
+	  !selectedTypes[bot.type])
+	bot.setSelection(false);
+    }
+  for (auto& battery : allies.batteries)
+    {
+      if (selectedTypes != std::array<bool, 5>{{false, false, false, false, false}} &&
+	  !selectedTypes[4])
+	battery.setSelection(false);
+    }
+}
+
+void Logic::selectAllBots()
+{
+  auto& allies = entityManager.allies;
+  for (auto& bot : allies.units)
+    {
+      bot.setSelection(true);
+    }
+  for (auto& battery : allies.batteries)
+    {
+      battery.setSelection(true);
+    }
+}
+
 void Logic::selectBots(Display const &display)
 {
   claws::Vect<2u, double> start(std::min(getMousePos(display).x(), dragOrigin.x()), std::min(getMousePos(display).y(), dragOrigin.y()));
@@ -425,21 +474,21 @@ void Logic::selectBots(Display const &display)
 void Logic::selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> end)
 {
   auto& allies = entityManager.allies;
-  std::for_each(allies.units.begin(), allies.units.end(), [start, end](NanoBot& bot){
+  std::for_each(allies.units.begin(), allies.units.end(), [this, start, end](NanoBot& bot){
       if (bot.fixture.pos.x() >= start.x() && bot.fixture.pos.x() <= end.x() &&
-	  bot.fixture.pos.y() >= start.y() && bot.fixture.pos.y() <= end.y())
-	{
-	  bot.setSelection(true);
-	}
+	  bot.fixture.pos.y() >= start.y() && bot.fixture.pos.y() <= end.y() &&
+	  (selectedTypes == std::array<bool, 5>{{false, false, false, false, false}} ||
+	   selectedTypes[bot.type]))
+	bot.setSelection(true);
       else
 	bot.setSelection(false);
     });
-  std::for_each(allies.batteries.begin(), allies.batteries.end(), [start, end](Battery& battery){
+  std::for_each(allies.batteries.begin(), allies.batteries.end(), [this, start, end](Battery& battery){
       if (battery.fixture.pos.x() >= start.x() && battery.fixture.pos.x() <= end.x() &&
-	  battery.fixture.pos.y() >= start.y() && battery.fixture.pos.y() <= end.y())
-	{
-	  battery.setSelection(true);
-	}
+	  battery.fixture.pos.y() >= start.y() && battery.fixture.pos.y() <= end.y() &&
+	  (selectedTypes == std::array<bool, 5>{{false, false, false, false, false}} ||
+	   selectedTypes[4]))
+	battery.setSelection(true);
       else
 	battery.setSelection(false);
     });
