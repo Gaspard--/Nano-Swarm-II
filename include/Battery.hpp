@@ -20,8 +20,9 @@ public:
   void setPower(int power);
   int getPower() const;
 
-  auto getTexture() const noexcept
+  auto getTexture(bool team) const noexcept
   {
-    return TextureHandler::TextureList::BATTERY;
+    return team ? TextureHandler::TextureList::BATTERY
+      : TextureHandler::TextureList::BATTERY_ENEMY;
   }
 };

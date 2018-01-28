@@ -81,20 +81,20 @@ void NanoBot::bomberAction(CollisionContainer &nearBots, Logic &logic)
     }
 }
 
-TextureHandler::TextureList NanoBot::getTexture() const noexcept
+TextureHandler::TextureList NanoBot::getTexture(bool team) const noexcept
 {
   switch (type)
     {
     case Type::WORKER:
-      return TextureHandler::TextureList::WORKER;
+      return team ? TextureHandler::TextureList::WORKER : TextureHandler::TextureList::WORKER_ENEMY;
     case Type::BRUTE:
       if (cooldown > 50)
-	return TextureHandler::TextureList::BLADES;
-      return TextureHandler::TextureList::BRUTE;
+	return team ? TextureHandler::TextureList::BLADES : TextureHandler::TextureList::BLADES_ENEMY;
+	  return team ? TextureHandler::TextureList::BRUTE : TextureHandler::TextureList::BRUTE_ENEMY;
     case Type::SHOOTER:
-      return TextureHandler::TextureList::SHOOTER;
+      return team ? TextureHandler::TextureList::SHOOTER : TextureHandler::TextureList::SHOOTER_ENEMY;
     case Type::BOMBER:
-      return TextureHandler::TextureList::BOMBER;
+      return team ? TextureHandler::TextureList::BOMBER : TextureHandler::TextureList::BOMBER_ENEMY;
     default:
       return TextureHandler::TextureList::UNIT;
     }

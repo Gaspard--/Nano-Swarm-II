@@ -42,5 +42,5 @@ public:
   void shooterAction(CollisionContainer &, Logic &);
   void bomberAction(CollisionContainer &, Logic &);
 
-  TextureHandler::TextureList getTexture() const noexcept;
+  TextureHandler::TextureList getTexture(bool team) const noexcept;
 };
