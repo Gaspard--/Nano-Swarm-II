@@ -80,22 +80,4 @@ template<class CollisionContainer, class CollisionContainer2, class Access>
 inline void NanoBot::ia(CollisionContainer &nearBots, CollisionContainer2 &nearBatteries, Battery &source, Access &access, Logic &logic)
 {
   fixture.target = source.fixture.pos;
-  // if energy is available go closer to ennemy
-  // shoot if there is energy close-by
-  if (type == WORKER
-      && (workerAction(nearBatteries, source, access, logic)
-	  || workerAction(nearBots, source, access, logic)))
-    return;
-  else if (type == BRUTE
-	   && (bruteAction(nearBatteries, source, access, logic)
-	       || bruteAction(nearBots, source, access, logic)))
-    return;
-  else if (type == SHOOTER
-	   && (shooterAction(nearBatteries, source, access, logic)
-	       || shooterAction(nearBots, source, access, logic)))
-    return;
-  else if (type == BOMBER
-	   && (bomberAction(nearBatteries, source, access, logic)
-	       || bomberAction(nearBots, source, access, logic)))
-    return;
 }
