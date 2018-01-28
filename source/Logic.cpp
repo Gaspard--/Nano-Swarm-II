@@ -1,64 +1,178 @@
 #include <thread>
 #include <mutex>
-#include <set>
+#include <unordered_map>
 #include <unordered_set>
+#include <bitset>
 #include "Logic.hpp"
 #include "Input.hpp"
 #include "Display.hpp"
 
 Logic::Logic(bool animation)
-  : running(true),
+  : lastUpdate(Clock::now()),
+    running(true),
     mousePos{0.0, 0.0},
     dragOrigin{0.0, 0.0},
     leftClick(false),
-    rightClick(false),
-    lastUpdate(Clock::now())
+    rightClick(false)
 {
   time = 0;
   score = 0;
   restart = false;
   gameOver = false;
   multiplier = 0;
-  for (std::size_t i(0ul); i < 5ul; ++i)
-    for (std::size_t j(0ul); j < 5ul; ++j)
+  for (std::size_t i(0ul); i < 10ul; ++i)
+    for (std::size_t j(0ul); j < 10ul; ++j)
       {
 	entityManager.allies.units.emplace_back(NanoBot::Type::BRUTE);
-	entityManager.allies.units[i * 5 + j].fixture.pos = {0.045 * static_cast<double>(i) - 0.5, 0.045 * static_cast<double>(j) - 0.5};
-	entityManager.allies.units[i * 5 + j].fixture.speed = {0.0, 0.0};
-	entityManager.allies.units[i * 5 + j].fixture.target = entityManager.allies.units[i * 5 + j].fixture.pos * 0.5;
+	entityManager.allies.units[i * 10 + j].fixture.pos = {0.045 * static_cast<double>(i) - 0.5, 0.045 * static_cast<double>(j) - 0.5};
+	entityManager.allies.units[i * 10 + j].fixture.speed = {0.0, 0.0};
+	entityManager.allies.units[i * 10 + j].fixture.target = entityManager.allies.units[i * 5 + j].fixture.pos * 0.5;
       }
 }
+
+template<class T>
+struct BitBasedSet
+{
+  std::vector<bool> data;
+
+  struct Iterator
+  {
+    std::vector<bool> &data;
+    TaggedIndex<T> index;
+
+    auto operator*()
+    {
+      return index;
+    }
+
+    auto operator++()
+    {
+      ++index;
+      while (index.data != data.size() && !data.at(index.data))
+	++index;
+      return *this;
+    }
+
+    auto operator==(Iterator const &other) const noexcept
+    {
+      return index == other.index;
+    }
+
+    auto operator!=(Iterator const &other) const noexcept
+    {
+      return index != other.index;
+    }
+  };
+
+  auto begin()
+  {
+    if (data.empty() || data[0])
+      return Iterator{data, {0}};
+    return ++Iterator{data, {0}};
+  }
+
+  auto end()
+  {
+    return Iterator{data, {static_cast<unsigned short>(data.size())}};
+  }
+
+  void emplace(TaggedIndex<T> index)
+  {
+    if (data.size() <= index.data)
+      data.resize(index.data + 1);
+    data[index.data] = true;
+  }
+
+  void clear()
+  {
+    data.clear();
+  }
+};
 
 template<class... T>
 struct Collisions
 {
   template<class U>
-  using Set = std::set<U *>;
+  using Set = BitBasedSet<U>;
 
   template<class U>
-  using Map = std::unordered_map<U *, std::tuple<Set<T>...>>;
+  using Map = std::unordered_map<TaggedIndex<U>, std::tuple<Set<T>...>>;
 
   using Container = std::tuple<Map<T>...>;
 };
 
+template<class ...T, class Func>
+static void forEachTuple(std::tuple<T...> &tuple, Func func)
+{
+  using expander = int[];
+
+  (void)expander{(func(std::get<T>(tuple)), 0)...};
+}
+
+template<class T>
+static void clearTuple(T &tuple)
+{
+  forEachTuple(tuple, [](auto &map)
+	       {
+		 for (auto &pair : map)
+		   forEachTuple(pair.second, [](auto &set)
+				{
+				  set.clear();
+				  // set.reserve(10);
+				});
+	       });
+}
+
 void Logic::update()
 {
+  struct Access
+  {
+    Logic &logic;
+
+    auto &operator[](TaggedIndex<TeamEntity<NanoBot, true>> index)
+    {
+      return logic.entityManager.allies.units[index.data];
+    }
+
+    auto &operator[](TaggedIndex<TeamEntity<Battery, true>> index)
+    {
+      return logic.entityManager.allies.batteries[index.data];
+    }
+
+    auto &operator[](TaggedIndex<TeamEntity<NanoBot, false>> index)
+    {
+      return logic.entityManager.ennemies.units[index.data];
+    }
+
+    auto &operator[](TaggedIndex<TeamEntity<Battery, false>> index)
+    {
+      return logic.entityManager.ennemies.batteries[index.data];
+    }
+
+    auto &operator[](TaggedIndex<Battery> index)
+    {
+      return logic.entityManager.pylones[index.data];
+    }
+  };
+
   using Collisions = Collisions<TeamEntity<NanoBot, true>, TeamEntity<NanoBot, false>, TeamEntity<Battery, true>,  TeamEntity<Battery, false>, Battery>;
 
-  Collisions::Container container;
-
-  auto submitCollision([&container](auto &a, auto &b)
+  static Collisions::Container container{};
+  clearTuple(container);
+  auto submitCollision([&container](auto a, auto b)
 		       {
-			 using A = std::remove_reference_t<decltype(a)>;
-			 using B = std::remove_reference_t<decltype(b)>;
+			 using A = decltype(a);
+			 using B = decltype(b);
 
-			 std::get<Collisions::Set<B>>(std::get<Collisions::Map<A>>(container)[&a]).emplace(&b);
+			 std::get<Collisions::Set<typename B::Tag>>(std::get<Collisions::Map<typename A::Tag>>(container)[a]).emplace(b);
 		       });
-  makePhysics(submitCollision).checkCollision(entityManager.allies.units, entityManager.allies.batteries,
-					      entityManager.ennemies.units, entityManager.ennemies.batteries,
-					      entityManager.pylones);
-  auto updateEntity([&container](auto &unit)
+  Access access{*this};
+  makePhysics(submitCollision, access).checkCollision(entityManager.allies.units, entityManager.allies.batteries,
+							     entityManager.ennemies.units, entityManager.ennemies.batteries,
+							     entityManager.pylones);
+  auto updateEntity([this, &container, &access](auto index)
   		    {
+		      auto &unit(access[index]);
 		      {
 			constexpr double const maxAccel = 0.001;
 			claws::Vect<2u, double> delta(unit.fixture.target - unit.fixture.pos);
@@ -72,13 +186,15 @@ void Logic::update()
 			claws::Vect<2u, double> dir{0.0, 0.0};
 			using UnitType = std::remove_reference_t<decltype(unit)>;
 
-			auto &near(std::get<Collisions::Map<UnitType>>(container)[&unit]);
-			auto reactToTeam([&dir, &unit](auto &container)
+			auto &near(std::get<Collisions::Map<UnitType>>(container)[index]);
+			auto reactToTeam([&dir, &unit, &access](auto &container)
 					 {
-					   for (auto *ally : container)
+					   for (auto allyIndex : container)
 					     {
-					       claws::Vect<2u, double> posDelta(unit.fixture.pos - ally->fixture.pos);
-					       claws::Vect<2u, double> speedDelta(unit.fixture.speed - ally->fixture.speed);
+					       auto &ally(access[allyIndex]);
+
+					       claws::Vect<2u, double> posDelta(unit.fixture.pos - ally.fixture.pos);
+					       claws::Vect<2u, double> speedDelta(unit.fixture.speed - ally.fixture.speed);
 					       double coef = posDelta.length2() + 0.001;
 
 					       coef = coef > 0.02 ? 1.0 / coef : coef;
@@ -96,8 +212,14 @@ void Logic::update()
 		      }
   		    });
 
-  entityManager.allies.iterOnTeam(updateEntity);
-  entityManager.ennemies.iterOnTeam(updateEntity);
+  for (unsigned short i(0u); i < entityManager.allies.batteries.size(); ++i)
+    updateEntity(TaggedIndex<TeamEntity<Battery, true>>(i));
+  for (unsigned short i(0u); i < entityManager.allies.units.size(); ++i)
+    updateEntity(TaggedIndex<TeamEntity<NanoBot, true>>(i));
+  for (unsigned short i(0u); i < entityManager.ennemies.batteries.size(); ++i)
+    updateEntity(TaggedIndex<TeamEntity<Battery, false>>(i));
+  for (unsigned short i(0u); i < entityManager.ennemies.units.size(); ++i)
+    updateEntity(TaggedIndex<TeamEntity<NanoBot, false>>(i));
 }
 
 void Logic::moveSelection(claws::Vect<2u, double> target)
@@ -111,7 +233,7 @@ void Logic::moveSelection(claws::Vect<2u, double> target)
       return averagePos;
     });
   auto averagePosAndCount(std::accumulate(entityManager.allies.units.begin(), entityManager.allies.units.end(),
-				  std::accumulate(entityManager.allies.batteries.begin(), entityManager.allies.batteries.end(),
+					  std::accumulate(entityManager.allies.batteries.begin(), entityManager.allies.batteries.end(),
 						  std::pair<double, claws::Vect<2u, double>>{0.0, {0.0, 0.0}}, sumUnitPos), sumUnitPos));
   auto averagePos(averagePosAndCount.second / averagePosAndCount.first);
   auto update([target, &averagePos](auto &unit) {
@@ -135,14 +257,13 @@ void Logic::tick(std::mutex &lock)
       lastUpdate = now;
       return ;
     }
-  lastUpdate += getTickTime();
-  if (now < lastUpdate)
-    std::this_thread::sleep_for(lastUpdate - now);
-
   {
     std::lock_guard<std::mutex> scopedLock(lock);
     update();
+    lastUpdate += getTickTime();
   }
+  if (now < lastUpdate)
+    std::this_thread::sleep_for(lastUpdate - now);
 }
 
 void Logic::addToScore(int add)
