@@ -21,6 +21,12 @@ public :
       SHOOTER,
       BOMBER,
       PYLONE,
+      SHOOTER_ENEMY,
+      BRUTE_ENEMY,
+      WORKER_ENEMY,
+      BOMBER_ENEMY,
+      BLADES_ENEMY,
+      BATTERY_ENEMY,
       countTexture
     };
 
