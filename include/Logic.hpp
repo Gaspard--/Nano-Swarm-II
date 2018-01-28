@@ -60,6 +60,7 @@ private:
   void selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> end);
   void refreshSelection();
   void selectAllBots();
+  void selectType(std::array<bool, 5> const& types);
 
 public:
   Logic(bool animation = true);

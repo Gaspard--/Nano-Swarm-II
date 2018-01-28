@@ -4,6 +4,7 @@
 #include <unordered_set>
 #include <type_traits>
 #include <bitset>
+#include <algorithm>
 #include "Logic.hpp"
 #include "Input.hpp"
 #include "Display.hpp"
@@ -361,7 +362,10 @@ void Logic::handleKey(Display const& display, GLFWwindow *window, Key key)
       if (leftClick)
       	selectBots(display);
       else
-	refreshSelection();
+	{
+	  refreshSelection();
+	  selectType(selectedTypes);
+	}
       break;
     default:
       break;
@@ -451,17 +455,37 @@ void Logic::refreshSelection()
     }
 }
 
+void Logic::selectType(std::array<bool, 5> const& types)
+{
+  auto& allies = entityManager.allies;
+  bool noSelection = (find_if(allies.units.begin(), allies.units.end(),
+			      [] (NanoBot& bot) { return bot.selected; }) == allies.units.end() &&
+		      find_if(allies.batteries.begin(), allies.batteries.end(),
+			      [] (Battery& battery) { return battery.selected; }) == allies.batteries.end());
+  if (!noSelection)
+    return;
+  if (types != std::array<bool, 5>{{false, false, false, false, false}})
+    {
+      for (auto& bot : allies.units)
+	{
+	  if (types[bot.type])
+	    bot.setSelection(true);
+	}
+      for (auto& battery : allies.batteries)
+	{
+	  if (types[4])
+	    battery.setSelection(true);
+	}
+    }
+}
+
 void Logic::selectAllBots()
 {
   auto& allies = entityManager.allies;
   for (auto& bot : allies.units)
-    {
-      bot.setSelection(true);
-    }
+    bot.setSelection(true);
   for (auto& battery : allies.batteries)
-    {
-      battery.setSelection(true);
-    }
+    battery.setSelection(true);
 }
 
 void Logic::selectBots(Display const &display)
