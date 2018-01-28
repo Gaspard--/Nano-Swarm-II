@@ -1,6 +1,7 @@
 #ifndef MY_OPENGL_HPP_
 # define MY_OPENGL_HPP_
 
+# define NOMINMAX
 # include <string>
 # include "GL/gl3w.h"
 # include <GLFW/glfw3.h>

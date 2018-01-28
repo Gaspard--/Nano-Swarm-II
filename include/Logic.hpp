@@ -15,11 +15,18 @@ class Display;
 
 class Logic
 {
-private:
+public:
   using Clock = std::conditional<std::chrono::high_resolution_clock::is_steady,
                                  std::chrono::high_resolution_clock,
                                  std::chrono::steady_clock>::type;
 
+  decltype(Clock::now()) lastUpdate;
+
+  static constexpr std::chrono::microseconds const getTickTime()
+  {
+    return std::chrono::microseconds(1000000 / 30);
+  };
+private:
   EntityManager entityManager;
 
   unsigned int timer;
@@ -40,14 +47,8 @@ private:
   bool leftClick;
   bool rightClick;
 
-  static constexpr std::chrono::microseconds const getTickTime()
-  {
-    return std::chrono::microseconds(1000000 / 120);
-  };
-
   std::size_t updatesSinceLastFrame;
 
-  decltype(Clock::now()) lastUpdate;
 
   void handleKey(GLFWwindow *window, Key key);
   void handleMouse(Display const &, GLFWwindow *window, Mouse mouse);

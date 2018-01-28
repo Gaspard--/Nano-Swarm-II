@@ -4,7 +4,7 @@
 
 struct EntityRenderable
 {
-  static constexpr float getRadius(){ return 0.01f; }
+  static constexpr float getRadius(){ return 0.04f; }
   // TEXTURE
   /// bottom left corner of source rect
   claws::Vect<2u, float> sourcePos{0.0f, 0.0f};

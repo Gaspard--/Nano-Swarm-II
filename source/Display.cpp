@@ -1,3 +1,4 @@
+#include <chrono>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -237,11 +238,11 @@ void Display::render()
 void Display::displayInterface()
 {
   //displayRect(Rect(claws::Vect( 0.8, 0.8 ), { 0.1, 0.1 }, { 0.0, 0.0, 0.9, 0.5 }));
-  displayRenderableAsHUD({ claws::Vect<2u, float>(0.0f, 0.0f),
-	claws::Vect<2u, float>(1.0f, 1.0f),
-	claws::Vect<2u, float>(0.0f, 0.0f),
-	claws::Vect<2u, float>(1.0f, 1.0f) },
-    textureHandler[TextureHandler::TextureList::TEST]);
+  // displayRenderableAsHUD({ claws::Vect<2u, float>(0.0f, 0.0f),
+  // 	claws::Vect<2u, float>(1.0f, 1.0f),
+  // 	claws::Vect<2u, float>(0.0f, 0.0f),
+  // 	claws::Vect<2u, float>(1.0f, 1.0f) },
+  //   textureHandler[TextureHandler::TextureList::TEST]);
 
 	for (auto it : displayInfo.hud)
 		displayHudBlock(it);
@@ -251,15 +252,18 @@ void Display::displayInterface()
 
 void Display::copyRenderData(Logic const &logic)
 {
-	auto renderEntity = [this](auto const &entity)
-	/*	if (true != static_cast<int>(0))
-			renderEntity = NULL;*/
-    {
+
+  double delta(static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(Logic::Clock::now() - logic.lastUpdate).count()) /
+	       static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(logic.getTickTime()).count()));
+  std::cout << delta << std::endl;
+  auto renderEntity = [this, delta](auto const &entity)
+  {
       displayInfo.entityRenderables[textureHandler.getTexture(entity.getTexture())]
-      .push_back({{0.0f, 0.0f}, {1.0f, 1.0f}, static_cast<claws::Vect<2u, float>>(entity.fixture.pos), static_cast<claws::Vect<2u, float>>(entity.fixture.speed.normalized())});
+      .push_back({{0.0f, 0.0f}, {1.0f, 1.0f}, static_cast<claws::Vect<2u, float>>(entity.fixture.pos + entity.fixture.speed * delta), static_cast<claws::Vect<2u, float>>(entity.fixture.speed.normalized())});
     };
 
   displayInfo.entityRenderables.clear();
+  displayInfo.entityRenderables.reserve(100);
   displayInfo.entityRenderables[textureHandler.getTexture(TextureHandler::TextureList::BOMB_SPRITE)]
     .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
   logic.getEntityManager().allies.iterOnTeam(renderEntity);
