@@ -12,6 +12,7 @@
 # include "Input.hpp"
 # include "EntityManager.hpp"
 # include "Laser.hpp"
+# include "Camera.hpp"
 
 class Display;
 class Camera;
@@ -44,6 +45,8 @@ private:
   bool startPage;
   bool running;
   std::vector<Laser> lasers;
+  unsigned int spawnDelay;
+  unsigned int level;
 
   // input variables
   claws::Vect<2u, double> mousePos;
@@ -72,6 +75,8 @@ public:
   void tick(std::mutex &lock, Camera const &);
   void addToScore(int);
   void addToTimer(unsigned int);
+  void createBot(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed, bool ally, NanoBot::Type type);
+  void spawnEnemies(Camera const &camera);
 
   template<class... Args>
   void addLaser(Args &&...args)
