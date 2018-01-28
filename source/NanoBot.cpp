@@ -32,18 +32,14 @@ void NanoBot::shooterAction(CollisionContainer &nearBots, Logic &logic)
     }
 }
 
-void NanoBot::workerAction(CollisionContainer &nearBots, Logic &logic)
+void NanoBot::workerAction(CollisionContainer &, Logic &)
 {
-  static constexpr double collectRange = 0.01;
-  static constexpr unsigned cooldown = 180;
+  // static constexpr double collectRange = 0.01;
+  // static constexpr unsigned cooldown = 180;
 
-  for (auto &entity : nearBots[this])
-    {
-
-    }
 }
 
-void NanoBot::bruteAction(CollisionContainer &nearBots, Logic &logic)
+void NanoBot::bruteAction(CollisionContainer &nearBots, Logic &)
 {
   static constexpr double attackRange = 0.01;
   static constexpr unsigned cooldown = 60;
@@ -59,7 +55,7 @@ void NanoBot::bruteAction(CollisionContainer &nearBots, Logic &logic)
     }
 }
 
-void NanoBot::bomberAction(CollisionContainer &nearBots, Logic &logic)
+void NanoBot::bomberAction(CollisionContainer &nearBots, Logic &)
 {
   static constexpr double attackRange = 0.01;
   static constexpr double explosionRange = 0.06;
