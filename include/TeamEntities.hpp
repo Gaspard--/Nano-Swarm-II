@@ -2,6 +2,7 @@
 
 #include "TextureHandler.hpp"
 #include "NanoBot.hpp"
+#include "Battery.hpp"
 
 template<class Base, bool team>
 struct TeamEntity : public Base

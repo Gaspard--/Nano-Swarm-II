@@ -1,11 +1,11 @@
 #include "Scrap.hpp"
 
-Scrap::Scrap(Claws::Vect<2u, double> pos, Claws::Vect<2u, double> speed, NanoBot::Type type)
-  : fixture(pos, speed, {0.0f, 0.0f})
+Scrap::Scrap(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed, NanoBot::Type type)
+  : fixture{pos, speed, claws::Vect<2u, double>{0.0f, 0.0f}}, type(type)
 {
 }
 
-void Scrap::update(auto begin, auto end, std::Vector<TeamEntity<NanoBot, true>>)
+void Scrap::update(auto begin, auto end, std::vector<TeamEntity<NanoBot, true>>)
 {
   std::vector<int> dists;
   int i(0);
@@ -26,5 +26,5 @@ void Scrap::update(auto begin, auto end, std::Vector<TeamEntity<NanoBot, true>>)
 	}
       i += 1;
     }
-  target = (begin + best).fixture.pos;
+  fixture.target = (begin + best).fixture.pos;
 }

@@ -1,7 +1,9 @@
 #pragma once
 
+#include <vector>
 #include "claws/Vect.hpp"
 #include "NanoBot.hpp"
+#include "TeamEntities.hpp"
 
 class Scrap
 {
@@ -9,7 +11,7 @@ class Scrap
   NanoBot::Type type;
 
 public:
-  Scrap(Claws::Vect<2u, double>, Claws::Vect<2u, double>, NanoBot::Type);
+  Scrap(claws::Vect<2u, double>, claws::Vect<2u, double>, NanoBot::Type);
   ~Scrap();
-  void update(auto begin, auto end, std::Vector<TeamEntity<NanoBot, true>>);
+  void update(auto begin, auto end, std::vector<TeamEntity<NanoBot, true>>);
 };

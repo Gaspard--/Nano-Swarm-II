@@ -184,7 +184,7 @@ void Display::displayRect(Rect const &rect)
 void Display::displayHudBlock(const HudBlock & block)
 {
 	displayRect(block.background);
-	displayText(block.message, block.fontSize, {8.0f, 8.0f}, 
+	displayText(block.message, block.fontSize, {8.0f, 8.0f},
 		block.rectMessage.pos,
 		block.rectMessage.size,
 		block.colorMessage);
@@ -263,8 +263,8 @@ void Display::copyRenderData(Logic const &logic)
 
   displayInfo.entityRenderables.clear();
   displayInfo.entityRenderables.reserve(100);
-  displayInfo.entityRenderables[textureHandler.getTexture(TextureHandler::TextureList::BOMB_SPRITE)]
-    .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
+  //  displayInfo.entityRenderables[textureHandler.getTexture(TextureHandler::TextureList::BOMB_SPRITE)]
+  //  .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
   logic.getEntityManager().allies.iterOnTeam(renderEntity);
   logic.getEntityManager().ennemies.iterOnTeam(renderEntity);
 
