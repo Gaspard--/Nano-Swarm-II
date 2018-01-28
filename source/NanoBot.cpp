@@ -31,6 +31,7 @@ void NanoBot::workerAction(CollisionContainer &nearBots, Logic &logic)
 
   for (auto &entity : nearBots[this])
     {
+
     }
 }
 
