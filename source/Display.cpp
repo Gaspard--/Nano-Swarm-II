@@ -252,13 +252,33 @@ void Display::displayInterface()
 
 void Display::copyRenderData(Logic const &logic)
 {
+  claws::Vect<2u, double> minBound{std::numeric_limits<double>::max(), std::numeric_limits<double>::max()};
+  claws::Vect<2u, double> maxBound{std::numeric_limits<double>::lowest(), std::numeric_limits<double>::lowest()};
+
+  auto updateBounds([&minBound, &maxBound](auto const &entity)
+		    {
+		      for (std::size_t i(0ul); i != 2; ++i)
+			{
+			  minBound[i] = std::min(minBound[i], entity.fixture.pos[i]);
+			  maxBound[i] = std::max(maxBound[i], entity.fixture.pos[i]);
+			}
+		    });
+  logic.getEntityManager().allies.iterOnTeam(updateBounds);
+  for (auto const &pylone : logic.getEntityManager().pylones)
+    updateBounds(pylone);
+  minBound -= claws::Vect<2u, double>{0.5, 0.5};
+  maxBound += claws::Vect<2u, double>{0.5, 0.5};
+
+  camera.offset = -static_cast<claws::Vect<2u, float>>((minBound + maxBound) * 0.5);
+  claws::Vect<2u, double> normalizedDiff((maxBound - minBound) * dim);
+  camera.zoom = 2.0f / static_cast<float>(std::max(normalizedDiff[0], normalizedDiff[1]));
 
   double delta(static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(Logic::Clock::now() - logic.lastUpdate).count()) /
 	       static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(logic.getTickTime()).count()));
   auto renderEntity = [this, delta](auto const &entity)
-  {
+    {
       displayInfo.entityRenderables[textureHandler.getTexture(entity.getTexture())]
-      .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, static_cast<claws::Vect<2u, float>>(entity.fixture.pos + entity.fixture.speed * delta), static_cast<claws::Vect<2u, float>>(rotate(entity.fixture.speed.normalized(), {0.0f, -1.0f}))});
+      .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, camera.apply(entity.fixture.pos + entity.fixture.speed * delta), 0.02f * camera.zoom,static_cast<claws::Vect<2u, float>>(rotate(entity.fixture.speed.normalized(), {0.0f, -1.0f}))});
     };
 
   displayInfo.entityRenderables.clear();
@@ -270,15 +290,15 @@ void Display::copyRenderData(Logic const &logic)
 
   hud.resize(ID_BLOCK::nb_bloc);
   hud[ID_BLOCK::BLOC_TIMER] = HudBlock(Rect({}, {}, {}),
-	  Rect({}, {}, {}),
-	  logic.getTimer(),
-	  256,
-	  { 1.0f, 1.0f, 1.0f });
+				       Rect({}, {}, {}),
+				       logic.getTimer(),
+				       256,
+				       { 1.0f, 1.0f, 1.0f });
   hud[ID_BLOCK::BLOC_SCORE] = HudBlock(Rect({}, {}, {}),
-	  Rect({}, {}, {}),
-	  logic.getScore(),
-	  256,
-	  { 1.0f, 1.0f, 1.0f });
+				       Rect({}, {}, {}),
+				       logic.getScore(),
+				       256,
+				       { 1.0f, 1.0f, 1.0f });
 }
 
 bool Display::isRunning() const
