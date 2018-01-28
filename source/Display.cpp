@@ -278,7 +278,7 @@ void Display::copyRenderData(Logic const &logic)
   auto renderEntity = [this, delta](auto const &entity)
     {
       displayInfo.entityRenderables[textureHandler.getTexture(entity.getTexture())]
-      .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, camera.apply(entity.fixture.pos + entity.fixture.speed * delta), 0.02f * camera.zoom,static_cast<claws::Vect<2u, float>>(rotate(entity.fixture.speed.normalized(), {0.0f, -1.0f}))});
+      .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, camera.apply(entity.fixture.pos + entity.fixture.speed * delta), 0.04f * camera.zoom,static_cast<claws::Vect<2u, float>>(rotate(entity.fixture.speed.normalized(), {0.0f, -1.0f}))});
     };
 
   displayInfo.entityRenderables.clear();
