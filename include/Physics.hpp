@@ -54,23 +54,20 @@ struct Physics
 private:
   using expander = int[];
 
-  constexpr auto getMinMaxImpl(std::tuple<>, std::tuple<>) const noexcept
+  constexpr auto getMinMaxImpl(std::tuple<>, std::tuple<>, std::size_t) const noexcept
   {
-    return std::pair<claws::Vect<2u, double>, claws::Vect<2u, double>>({std::numeric_limits<double>::max(), std::numeric_limits<double>::max()},
-								       {std::numeric_limits<double>::lowest(), std::numeric_limits<double>::lowest()});
+    return std::pair<double, double>({std::numeric_limits<double>::max()},
+				     {std::numeric_limits<double>::lowest()});
   }
 
   template<class First, class... It>
-  auto getMinMaxImpl(std::tuple<First, It...> const &begin, std::tuple<First, It...> const &end)
+  auto getMinMaxImpl(std::tuple<First, It...> const &begin, std::tuple<First, It...> const &end, std::size_t dir)
   {
-    return std::accumulate(std::get<First>(begin), std::get<First>(end), getMinMaxImpl(std::tuple<It...>{std::get<It>(begin)...}, std::tuple<It...>{std::get<It>(end)...}),
-			   [this](auto minmax, auto const &elem)
+    return std::accumulate(std::get<First>(begin), std::get<First>(end), getMinMaxImpl(std::tuple<It...>{std::get<It>(begin)...}, std::tuple<It...>{std::get<It>(end)...}, dir),
+			   [this, dir](auto minmax, auto const &elem)
 			   {
-			     for (std::size_t i(0ul); i != 2ul; ++i)
-			       {
-				 minmax.first[i] = std::min(minmax.first[i], access[elem].fixture.pos[i]);
-				 minmax.second[i] = std::max(minmax.second[i], access[elem].fixture.pos[i]);
-			       }
+			     minmax.first = std::min(minmax.first, access[elem].fixture.pos[dir]);
+			     minmax.second = std::max(minmax.second, access[elem].fixture.pos[dir]);
 			     return minmax;
 			   });
   }
@@ -95,25 +92,23 @@ private:
   }
 
   template<class... It>
-  void checkCollisionImpl(std::tuple<It...> const &begin, std::tuple<It...> const &end, std::size_t level)
+  void checkCollisionImpl(std::tuple<It...> const &begin, std::tuple<It...> const &end, std::size_t level, std::size_t prevSize, std::size_t dir)
   {
-    if (claws::Vect<sizeof...(It), std::size_t>{static_cast<std::size_t>((std::get<It>(end) - std::get<It>(begin)))...}.sum() < 10ul || level >= 4u)
-      return classicSolve(begin, end);
-    claws::Vect<2u, double> min;
-    claws::Vect<2u, double> max;
-    std::tie(min, max) = getMinMaxImpl(begin, end);
-    claws::Vect<2u, double> mid((min + max) * 0.5);
-    for (std::size_t i(0ul); i != 2ul; ++i)
-      {
-	auto isBelow([this, mid, i](auto const &a){
-	    return access[a].fixture.pos[i] + access[a].fixture.getRadius() > mid[i];
-	  });
-	auto isAbove([this, mid, i](auto const &a){
-	    return access[a].fixture.pos[i] - access[a].fixture.getRadius() < mid[i];
-	  });
-	checkCollisionImpl(begin, std::tuple<It...>{std::partition(std::get<It>(begin), std::get<It>(end), isBelow)...}, level + 1);
-	checkCollisionImpl(begin, std::tuple<It...>{std::partition(std::get<It>(begin), std::get<It>(end), isAbove)...}, level + 1);
-      }
+    auto size(claws::Vect<sizeof...(It), std::size_t>{static_cast<std::size_t>((std::get<It>(end) - std::get<It>(begin)))...}.sum());
+    if (size < 15ul || size * 16 > prevSize * 10 || level >= 12u)
+      return classicSolve(begin, end); // n * n
+    double min;
+    double max;
+    std::tie(min, max) = getMinMaxImpl(begin, end, dir); // n
+    auto mid((min + max) * 0.5);
+    auto isBelow([this, mid, dir](auto const &a) {
+	return access[a].fixture.pos[dir] + access[a].fixture.getRadius() > mid;
+      });
+    auto isAbove([this, mid, dir](auto const &a) {
+	return access[a].fixture.pos[dir] - access[a].fixture.getRadius() < mid;
+      });
+    checkCollisionImpl(begin, std::tuple<It...>{std::partition(std::get<It>(begin), std::get<It>(end), isBelow)...}, level + 1, size, !dir); // n
+    checkCollisionImpl(begin, std::tuple<It...>{std::partition(std::get<It>(begin), std::get<It>(end), isAbove)...}, level + 1, size, !dir); // n
   }
 
   template<class... T>
@@ -124,7 +119,7 @@ private:
 			      static_cast<unsigned short>(0u)), 0)...};
     checkCollisionImpl(std::tuple<typename T::iterator...>{std::get<T>(containers).begin()...},
 		       std::tuple<typename T::iterator...>{std::get<T>(containers).end()...},
-		       0);
+		       0, ~0ul, 0ul);
   }
 
 public:

@@ -255,11 +255,10 @@ void Display::copyRenderData(Logic const &logic)
 
   double delta(static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(Logic::Clock::now() - logic.lastUpdate).count()) /
 	       static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(logic.getTickTime()).count()));
-  std::cout << delta << std::endl;
   auto renderEntity = [this, delta](auto const &entity)
   {
       displayInfo.entityRenderables[textureHandler.getTexture(entity.getTexture())]
-      .push_back({{0.0f, 0.0f}, {1.0f, 1.0f}, static_cast<claws::Vect<2u, float>>(entity.fixture.pos + entity.fixture.speed * delta), static_cast<claws::Vect<2u, float>>(entity.fixture.speed.normalized())});
+      .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, static_cast<claws::Vect<2u, float>>(entity.fixture.pos + entity.fixture.speed * delta), static_cast<claws::Vect<2u, float>>(rotate(entity.fixture.speed.normalized(), {0.0f, -1.0f}))});
     };
 
   displayInfo.entityRenderables.clear();

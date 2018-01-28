@@ -26,6 +26,7 @@ struct HudBlock
 	unsigned int		fontSize;
 	claws::Vect<3u, float>	colorMessage;
 };
+
 struct DisplayInfo
 {
   std::unordered_map<GLuint, std::vector<Renderable>> renderables;

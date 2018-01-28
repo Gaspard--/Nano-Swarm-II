@@ -24,7 +24,7 @@ public:
 
   static constexpr std::chrono::microseconds const getTickTime()
   {
-    return std::chrono::microseconds(1000000 / 30);
+    return std::chrono::microseconds(1000000 / 60);
   };
 private:
   EntityManager entityManager;

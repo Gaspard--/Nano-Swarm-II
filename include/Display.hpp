@@ -131,7 +131,7 @@ public:
     glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
     my_opengl::setUniform(dim, "dim", textureContext.program);
     my_opengl::setUniform(0u, "tex", textureContext.program);
-    glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(float), buffer.get(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(float), buffer.get(), GL_DYNAMIC_DRAW);
     glDrawArrays(GL_TRIANGLES, 0, 6 * count);
   }
 };

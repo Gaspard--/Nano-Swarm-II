@@ -21,13 +21,13 @@ Logic::Logic(bool animation)
   restart = false;
   gameOver = false;
   multiplier = 0;
-  for (std::size_t i(0ul); i < 10ul; ++i)
-    for (std::size_t j(0ul); j < 10ul; ++j)
+  for (std::size_t i(0ul); i < 40ul; ++i)
+    for (std::size_t j(0ul); j < 50ul; ++j)
       {
 	entityManager.allies.units.emplace_back(NanoBot::Type::BRUTE);
-	entityManager.allies.units[i * 10 + j].fixture.pos = {0.045 * static_cast<double>(i) - 0.5, 0.045 * static_cast<double>(j) - 0.5};
-	entityManager.allies.units[i * 10 + j].fixture.speed = {0.0, 0.0};
-	entityManager.allies.units[i * 10 + j].fixture.target = entityManager.allies.units[i * 5 + j].fixture.pos * 0.5;
+	entityManager.allies.units[i * 50 + j].fixture.pos = {0.045 * static_cast<double>(i) - 0.5, 0.045 * static_cast<double>(j) - 0.5};
+	entityManager.allies.units[i * 50 + j].fixture.speed = {0.0, 0.0};
+	entityManager.allies.units[i * 50 + j].fixture.target = entityManager.allies.units[i * 50 + j].fixture.pos * 0.5;
       }
 }
 
@@ -175,15 +175,7 @@ void Logic::update()
   		    {
 		      auto &unit(access[index]);
 		      {
-			constexpr double const maxAccel = 0.001;
-			claws::Vect<2u, double> delta(unit.fixture.target - unit.fixture.pos);
-
-			if (delta.length2() > maxAccel * maxAccel)
-			  delta = delta.normalized() * maxAccel;
-			unit.fixture.speed += delta;
-		      }
-		      {
-			constexpr double const maxAccel(0.0001);
+			constexpr double const maxAccel(0.0005);
 			claws::Vect<2u, double> dir{0.0, 0.0};
 			using UnitType = std::remove_reference_t<decltype(unit)>;
 
@@ -196,7 +188,7 @@ void Logic::update()
 
 					       claws::Vect<2u, double> posDelta(unit.fixture.pos - ally.fixture.pos);
 					       claws::Vect<2u, double> speedDelta(unit.fixture.speed - ally.fixture.speed);
-					       double coef = posDelta.length2() + 0.001;
+					       double coef = posDelta.length2() - 0.02;
 
 					       coef = coef > 0.02 ? 1.0 / coef : coef;
 					       dir += speedDelta * 0.005;
@@ -208,8 +200,19 @@ void Logic::update()
 			reactToTeam(std::get<Collisions::Set<Battery>>(nearEntities));
 			if (dir.length2() > maxAccel * maxAccel)
 			  dir = dir.normalized() * maxAccel;
-			(unit.fixture.speed += dir) *= 0.9;
+			(unit.fixture.speed += dir) *= 0.90;
 			unit.fixture.pos += unit.fixture.speed;
+		      }
+		      {
+			constexpr double const maxAccel = 0.001;
+			claws::Vect<2u, double> delta(unit.fixture.target - unit.fixture.pos);
+
+			if (delta.length2() > maxAccel)
+			  {
+			    if (delta.length2() > maxAccel * maxAccel)
+			      delta = delta.normalized() * maxAccel;
+			    unit.fixture.speed += delta;
+			  }
 		      }
 
   		    });
@@ -238,11 +241,13 @@ void Logic::moveSelection(claws::Vect<2u, double> target)
 					  std::accumulate(entityManager.allies.batteries.begin(), entityManager.allies.batteries.end(),
 						  std::pair<double, claws::Vect<2u, double>>{0.0, {0.0, 0.0}}, sumUnitPos), sumUnitPos));
   auto averagePos(averagePosAndCount.second / averagePosAndCount.first);
-  auto update([target, &averagePos](auto &unit) {
+  auto count(averagePosAndCount.first);
+
+  auto update([target, &averagePos, count](auto &unit) {
       if (unit.selected)
 	{
 	  claws::Vect<2u, double> offset(unit.fixture.pos - averagePos);
-	  unit.fixture.target = offset * 0.5 + target;
+	  unit.fixture.target = offset * (1.0 - (200.0 / (count + 200.0))) + target;
 	}
     });
   entityManager.allies.iterOnTeam(update);
