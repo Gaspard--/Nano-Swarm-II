@@ -8,16 +8,17 @@ class EntityManager;
 class Battery : public Entity
 {
 private:
-  int power;
-  constexpr static int maxPower = 100;
+  unsigned int power;
+  constexpr static unsigned int maxPower = 100;
 
 public:
-  Battery(int power = 100);
+  Battery(unsigned int power = maxPower);
   ~Battery() = default;
 
+  void reload(Battery &source);
   void update();
   void ia(EntityManager& em);
-  void setPower(int power);
+  void setPower(unsigned int power);
   int getPower() const;
 
   auto getTexture(bool team) const noexcept

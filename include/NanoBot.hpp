@@ -7,6 +7,7 @@
 
 class EntityManager;
 class Logic;
+class Battery;
 
 class NanoBot : public Entity
 {
@@ -15,8 +16,7 @@ private:
 
 public:
   bool hasPlayed;
-  using CollisionContainer = std::map<Entity *, std::set<Entity *>>;
-
+  
   enum Type : std::size_t
   {
     WORKER,
@@ -35,12 +35,21 @@ public:
   }
 
   void update();
-  void ia(EntityManager& em);
+  
+  template<class CollisionContainer, class CollisionContainer2, class Access>
+  inline void ia(CollisionContainer &nearBots, CollisionContainer2 &nearBatteries, Battery &source, Access &access, Logic &logic);
 
-  void workerAction(CollisionContainer &, Logic &);
-  void bruteAction(CollisionContainer &, Logic &);
-  void shooterAction(CollisionContainer &, Logic &);
-  void bomberAction(CollisionContainer &, Logic &);
+  template<class CollisionContainer, class Access>
+  void workerAction(CollisionContainer &, Battery &, Access &, Logic &);
+
+  template<class CollisionContainer, class Access>
+  void bruteAction(CollisionContainer &, Battery &, Access &, Logic &);
+
+  template<class CollisionContainer, class Access>
+  void shooterAction(CollisionContainer &, Battery &, Access &, Logic &);
+
+  template<class CollisionContainer, class Access>
+  void bomberAction(CollisionContainer &, Battery &, Access &, Logic &);
 
   TextureHandler::TextureList getTexture(bool team) const noexcept;
 };

@@ -1,7 +1,7 @@
 #include "Battery.hpp"
 #include "EntityManager.hpp"
 
-Battery::Battery(int power)
+Battery::Battery(unsigned int power)
   : power(power)
 {
 }
@@ -13,12 +13,22 @@ void Battery::ia(EntityManager& em)
   // repeat
 }
 
+void Battery::reload(Battery &source)
+{
+  constexpr unsigned int step(16u);
+
+  unsigned int take(std::min(std::min(source.power, step), maxPower -power));
+
+  source.power -= take;
+  power += take;
+}
+
 void Battery::update()
 {
 
 }
 
-void Battery::setPower(int power)
+void Battery::setPower(unsigned int power)
 {
   this->power = power;
 }

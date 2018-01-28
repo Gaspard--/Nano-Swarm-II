@@ -124,8 +124,20 @@ void Logic::update(Display &display)
     updateEntity(TaggedIndex<TeamEntity<Battery, true>>(i), entityManager.allies.batteries[i], container, access);
   for (unsigned short i(0u); i < entityManager.ennemies.batteries.size(); ++i)
     updateEntity(TaggedIndex<TeamEntity<Battery, false>>(i), entityManager.ennemies.batteries[i], container, access);
-  // for (unsigned short i(0u); i < entityManager.ennemies.batteries.size(); ++i)
-  //   updateEntity(TaggedIndex<TeamEntity<Battery, false>>(i), entityManager.allies.batteries[i], updateEntity);
+  for (unsigned short i(0u); i < entityManager.pylones.size(); ++i)
+    {
+      auto &nearEntities(std::get<Collisions::Map<Battery>>(container)[TaggedIndex<Battery>(i)]);
+      for (auto allyIndex : std::get<Collisions::Set<TeamEntity<NanoBot, true>>>(nearEntities))
+	if (!access[allyIndex].hasPlayed)
+	  updateEntity(allyIndex, entityManager.pylones[i], container, access);
+      for (auto allyIndex : std::get<Collisions::Set<TeamEntity<NanoBot, false>>>(nearEntities))
+	if (!access[allyIndex].hasPlayed)
+	  updateEntity(allyIndex, entityManager.pylones[i], container, access);
+      for (auto allyIndex : std::get<Collisions::Set<TeamEntity<Battery, true>>>(nearEntities))
+        access[allyIndex].reload(entityManager.pylones[i]);
+      for (auto allyIndex : std::get<Collisions::Set<TeamEntity<Battery, false>>>(nearEntities))
+        access[allyIndex].reload(entityManager.pylones[i]);
+    }
   auto update([](Entity &unit){
       unit.fixture.speed *= 0.9;
       unit.fixture.pos += unit.fixture.speed;

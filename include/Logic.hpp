@@ -11,6 +11,7 @@
 # include <mutex>
 # include "Input.hpp"
 # include "EntityManager.hpp"
+# include "Battery.hpp"
 # include "Laser.hpp"
 # include "Camera.hpp"
 
@@ -186,8 +187,39 @@ public:
 
   using Collisions = CollisionsImpl<TeamEntity<NanoBot, true>, TeamEntity<NanoBot, false>, TeamEntity<Battery, true>,  TeamEntity<Battery, false>, Battery>;
 
+  template<bool team, class Source, class Container, class Access>
+  void updateAttack(TaggedIndex<TeamEntity<NanoBot, team>> index, Source &source, Container &container, Access &access)
+  {
+    auto &unit(access[index]);
+    using UnitType = std::remove_reference_t<decltype(unit)>;
+    auto &nearEntities(std::get<Collisions::Map<UnitType>>(container)[index]);
 
+    switch (unit.type)
+      {
+      case NanoBot::Type::WORKER:
+	break;
+      case NanoBot::Type::BRUTE:
+	unit.workerAction(std::get<Collisions::Set<TeamEntity<Battery, !UnitType::getTeam()>>>(nearEntities), source, access, *this);
+	unit.workerAction(std::get<Collisions::Set<TeamEntity<NanoBot, !UnitType::getTeam()>>>(nearEntities), source, access, *this);
+	break;
+      case NanoBot::Type::SHOOTER:
+	unit.workerAction(std::get<Collisions::Set<TeamEntity<Battery, !UnitType::getTeam()>>>(nearEntities), source, access, *this);
+	unit.workerAction(std::get<Collisions::Set<TeamEntity<NanoBot, !UnitType::getTeam()>>>(nearEntities), source, access, *this);
+	break;
+      case NanoBot::Type::BOMBER:
+	unit.workerAction(std::get<Collisions::Set<TeamEntity<Battery, !UnitType::getTeam()>>>(nearEntities), source, access, *this);
+	unit.workerAction(std::get<Collisions::Set<TeamEntity<NanoBot, !UnitType::getTeam()>>>(nearEntities), source, access, *this);
+	break;
+      default:
+	break;
+      }    
+  }
 
+  template<bool team, class Source, class Container, class Access>
+  void updateAttack(TaggedIndex<TeamEntity<Battery, team>>, Source &, Container &, Access &)
+  {
+  }
+  
   template<class Index, class Source, class Container, class Access>
   void updateEntity(Index index, Source &source, Container &container, Access &access)
   {
@@ -238,8 +270,11 @@ public:
 	  unit.fixture.speed += delta;
 	}
     }
+    updateAttack(index, source, container, access);
   }
-
+  
 };
+
+#include "NanoBotImpl.hpp"
 
 #endif // !LOGIC_HPP_

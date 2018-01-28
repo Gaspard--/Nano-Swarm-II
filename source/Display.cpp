@@ -310,6 +310,11 @@ void Display::copyRenderData(Logic const &logic)
   displayInfo.entityRenderables.reserve(100);
   logic.getEntityManager().allies.iterOnTeam(renderEntity);
   logic.getEntityManager().ennemies.iterOnTeam(renderEntity);
+  for (auto const &pylone : logic.getEntityManager().pylones)
+    {
+      displayInfo.entityRenderables[textureHandler[TextureHandler::TextureList::PYLONE]]
+	.push_back({{0.0f, 0.0f}, {1.0f, 1.0f}, camera.apply(pylone.fixture.pos), 0.1f * camera.zoom, {1.0f, 0.0f}});
+    }
 
   hud.resize(ID_BLOCK::nb_bloc);
   hud[ID_BLOCK::BLOC_TIMER] = HudBlock(Rect({}, {}, {}),
