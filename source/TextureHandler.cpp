@@ -8,8 +8,10 @@ TextureHandler::TextureHandler()
   addTexture(TextureList::UNIT, "resources/Unit.bmp");
   addTexture(TextureList::WORKER, "resources/Worker.bmp");
   addTexture(TextureList::BRUTE, "resources/Brute.bmp");
+  addTexture(TextureList::BLADES, "resources/Blades.bmp");
   addTexture(TextureList::SHOOTER, "resources/Shooter.bmp");
   addTexture(TextureList::BOMBER, "resources/Bomber.bmp");
+  addTexture(TextureList::PYLONE, "resources/Pylone.bmp");
 }
 
 void TextureHandler::addTexture(TextureList id, std::string const& path)

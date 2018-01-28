@@ -17,8 +17,10 @@ public :
       UNIT,
       WORKER,
       BRUTE,
+      BLADES,
       SHOOTER,
       BOMBER,
+      PYLONE,
       countTexture
     };
 
