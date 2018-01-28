@@ -26,7 +26,12 @@ public:
 
   Type type;
 
-  NanoBot(Type type);
+  constexpr NanoBot(Type type)
+  : cooldown(0u),
+    hasPlayed(true),
+    type(type)
+  {
+  }
 
   void workerAction(CollisionContainer &, Logic &);
   void bruteAction(CollisionContainer &, Logic &);

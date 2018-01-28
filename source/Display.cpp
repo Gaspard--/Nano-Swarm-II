@@ -300,14 +300,14 @@ void Display::copyRenderData(Logic const &logic)
     {
       Texture entityTexture(textureHandler.getTexture(entity.getTexture()));
 
+      auto dir((entity.fixture.speed.length2() > 0.000001) ? entity.fixture.speed.normalized() : claws::Vect<2u, double>{1.0, 0.0});
+	
       displayInfo.entityRenderables[entityTexture]
-      .push_back({{0.0f, 0.0f}, {1.0f / 7.0f, 1.0f}, camera.apply(entity.fixture.pos + entity.fixture.speed * delta), 0.04f * camera.zoom,static_cast<claws::Vect<2u, float>>(rotate(entity.fixture.speed.normalized(), {0.0f, -1.0f}))});
+      .push_back({{0.0f, 0.0f}, {1.0f / 7.0f, 1.0f}, camera.apply(entity.fixture.pos + entity.fixture.speed * delta), 0.04f * camera.zoom,static_cast<claws::Vect<2u, float>>(rotate(dir, {0.0f, -1.0f}))});
     };
 
   displayInfo.entityRenderables.clear();
   displayInfo.entityRenderables.reserve(100);
-  //  displayInfo.entityRenderables[textureHandler.getTexture(TextureHandler::TextureList::BOMB_SPRITE)]
-  //  .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
   logic.getEntityManager().allies.iterOnTeam(renderEntity);
   logic.getEntityManager().ennemies.iterOnTeam(renderEntity);
 

@@ -2,11 +2,6 @@
 #include "NanoBot.hpp"
 #include "Logic.hpp"
 
-NanoBot::NanoBot(Type type)
-  : type(type)
-{
-}
-
 void NanoBot::shooterAction(CollisionContainer &nearBots, Logic &logic)
 {
   static constexpr double attackRange = 0.05;
