@@ -1,7 +1,9 @@
 #pragma once
 
+#include "NanoBot.hpp"
+
 template<class CollisionContainer, class Access>
-inline void NanoBot::shooterAction(CollisionContainer &nearBots, Battery &source, Access &access, Logic &logic)
+inline bool NanoBot::shooterAction(CollisionContainer &nearBots, Battery &source, Access &access, Logic &logic)
 {
   static constexpr double attackRange = 0.05;
   static constexpr unsigned cooldown = 300;
@@ -14,24 +16,25 @@ inline void NanoBot::shooterAction(CollisionContainer &nearBots, Battery &source
 	  logic.addLaser(fixture.pos, entity->fixture.pos, 1.0);
 	  this->cooldown = cooldown;
 	  entity->dead = true;
-	  return;
+	  return true;
 	}
     }
+  return false;
 }
 
 template<class CollisionContainer, class Access>
-inline void NanoBot::workerAction(CollisionContainer &nearBots, Battery &source, Access &access, Logic &logic)
+inline bool NanoBot::workerAction(CollisionContainer &nearBots, Battery &source, Access &access, Logic &logic)
 {
   static constexpr double collectRange = 0.01;
   static constexpr unsigned cooldown = 180;
 
   {
-    // TODO
+    return false;
   }
 }
 
 template<class CollisionContainer, class Access>
-inline void NanoBot::bruteAction(CollisionContainer &nearBots, Battery &source, Access &access, Logic &logic)
+inline bool NanoBot::bruteAction(CollisionContainer &nearBots, Battery &source, Access &access, Logic &logic)
 {
   static constexpr double attackRange = 0.01;
   static constexpr unsigned cooldown = 60;
@@ -43,12 +46,14 @@ inline void NanoBot::bruteAction(CollisionContainer &nearBots, Battery &source, 
 	{
 	  this->cooldown = cooldown;
 	  entity->dead = true;
+	  return true;
 	}
     }
+  return false;
 }
 
 template<class CollisionContainer, class Access>
-inline void NanoBot::bomberAction(CollisionContainer &nearBots, Battery &source, Access &access, Logic &logic)
+inline bool NanoBot::bomberAction(CollisionContainer &nearBots, Battery &source, Access &access, Logic &logic)
 {
   static constexpr double attackRange = 0.01;
   static constexpr double explosionRange = 0.06;
@@ -65,26 +70,32 @@ inline void NanoBot::bomberAction(CollisionContainer &nearBots, Battery &source,
 		toKill->dead = true;
 	    }
 	  this->dead = true;
-	  return;
+	  return true;
 	}
     }
+  return false;
 }
 
 template<class CollisionContainer, class CollisionContainer2, class Access>
 inline void NanoBot::ia(CollisionContainer &nearBots, CollisionContainer2 &nearBatteries, Battery &source, Access &access, Logic &logic)
 {
-  // source est ce qui fourni le jus
-  // go near ennemies
+  fixture.target = source.fixture.pos;
   // if energy is available go closer to ennemy
   // shoot if there is energy close-by
-  for (auto &entityIndex : nearBots)
-    {
-      auto entity(access[entityIndex]);
-      // bots (ennemy)
-    }
-  for (auto &entityIndex : nearBots)
-    {
-      auto entity(access[entityIndex]);
-      // batteries (ennemy)
-    }
+  if (type == WORKER
+      && (workerAction(nearBatteries, source, access, logic)
+	  || workerAction(nearBots, source, access, logic)))
+    return;
+  else if (type == BRUTE
+	   && (bruteAction(nearBatteries, source, access, logic)
+	       || bruteAction(nearBots, source, access, logic)))
+    return;
+  else if (type == SHOOTER
+	   && (shooterAction(nearBatteries, source, access, logic)
+	       || shooterAction(nearBots, source, access, logic)))
+    return;
+  else if (type == BOMBER
+	   && (bomberAction(nearBatteries, source, access, logic)
+	       || bomberAction(nearBots, source, access, logic)))
+    return;
 }

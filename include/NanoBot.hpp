@@ -16,7 +16,7 @@ private:
 
 public:
   bool hasPlayed;
-  
+
   enum Type : std::size_t
   {
     WORKER,
@@ -35,21 +35,21 @@ public:
   }
 
   void update();
-  
+
   template<class CollisionContainer, class CollisionContainer2, class Access>
   inline void ia(CollisionContainer &nearBots, CollisionContainer2 &nearBatteries, Battery &source, Access &access, Logic &logic);
 
   template<class CollisionContainer, class Access>
-  void workerAction(CollisionContainer &, Battery &, Access &, Logic &);
+  bool workerAction(CollisionContainer &, Battery &, Access &, Logic &);
 
   template<class CollisionContainer, class Access>
-  void bruteAction(CollisionContainer &, Battery &, Access &, Logic &);
+  bool bruteAction(CollisionContainer &, Battery &, Access &, Logic &);
 
   template<class CollisionContainer, class Access>
-  void shooterAction(CollisionContainer &, Battery &, Access &, Logic &);
+  bool shooterAction(CollisionContainer &, Battery &, Access &, Logic &);
 
   template<class CollisionContainer, class Access>
-  void bomberAction(CollisionContainer &, Battery &, Access &, Logic &);
+  bool bomberAction(CollisionContainer &, Battery &, Access &, Logic &);
 
   TextureHandler::TextureList getTexture(bool team) const noexcept;
 };
