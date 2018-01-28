@@ -1,7 +1,5 @@
 #include <thread>
 #include <mutex>
-#include <unordered_map>
-#include <unordered_set>
 #include <type_traits>
 #include <bitset>
 #include "Logic.hpp"
@@ -23,93 +21,22 @@ Logic::Logic(bool animation)
   gameOver = false;
   multiplier = 0;
   for (std::size_t i(0ul); i < 10ul; ++i)
-    for (std::size_t j(0ul); j < 50ul; ++j)
+    for (std::size_t j(0ul); j < 10ul; ++j)
       {
 	entityManager.allies.units.emplace_back((i & 1) ? NanoBot::Type::BRUTE :  NanoBot::Type::SHOOTER);
-	entityManager.allies.units[i * 50 + j].fixture.pos = {0.045 * static_cast<double>(i) - 0.5, 0.045 * static_cast<double>(j) - 0.5};
-	entityManager.allies.units[i * 50 + j].fixture.speed = {0.0, 0.0};
-	entityManager.allies.units[i * 50 + j].fixture.target = entityManager.allies.units[i * 50 + j].fixture.pos * 0.5;
+	entityManager.allies.units[i * 10 + j].fixture.pos = {0.045 * static_cast<double>(i) - 0.5, 0.045 * static_cast<double>(j) - 0.5};
+	entityManager.allies.units[i * 10 + j].fixture.speed = {0.0, 0.0};
+	entityManager.allies.units[i * 10 + j].fixture.target = entityManager.allies.units[i * 10 + j].fixture.pos;
       }
   for (std::size_t i(0ul); i < 10ul; ++i)
-    for (std::size_t j(0ul); j < 50ul; ++j)
+    for (std::size_t j(0ul); j < 10ul; ++j)
       {
 	entityManager.allies.batteries.emplace_back(10);
-	entityManager.allies.batteries[i * 50 + j].fixture.pos = {0.045 * static_cast<double>(i) - 0.455, 0.045 * static_cast<double>(j) - 0.5};
-	entityManager.allies.batteries[i * 50 + j].fixture.speed = {0.0, 0.0};
-	entityManager.allies.batteries[i * 50 + j].fixture.target = entityManager.allies.units[i * 50 + j].fixture.pos * 0.5;
+	entityManager.allies.batteries[i * 10 + j].fixture.pos = {0.045 * static_cast<double>(i), 0.045 * static_cast<double>(j) + 1.0};
+	entityManager.allies.batteries[i * 10 + j].fixture.speed = {0.0, 0.0};
+	entityManager.allies.batteries[i * 10 + j].fixture.target = entityManager.allies.batteries[i * 10 + j].fixture.pos;
       }
 }
-
-template<class T>
-struct BitBasedSet
-{
-  std::vector<bool> data;
-
-  struct Iterator
-  {
-    std::vector<bool> &data;
-    TaggedIndex<T> index;
-
-    auto operator*()
-    {
-      return index;
-    }
-
-    auto operator++()
-    {
-      ++index;
-      while (index.data != data.size() && !data.at(index.data))
-	++index;
-      return *this;
-    }
-
-    auto operator==(Iterator const &other) const noexcept
-    {
-      return index == other.index;
-    }
-
-    auto operator!=(Iterator const &other) const noexcept
-    {
-      return index != other.index;
-    }
-  };
-
-  auto begin()
-  {
-    if (data.empty() || data[0])
-      return Iterator{data, {0}};
-    return ++Iterator{data, {0}};
-  }
-
-  auto end()
-  {
-    return Iterator{data, {static_cast<unsigned short>(data.size())}};
-  }
-
-  void emplace(TaggedIndex<T> index)
-  {
-    if (data.size() <= index.data)
-      data.resize(index.data + 1, 0);
-    data[index.data] = true;
-  }
-
-  void clear()
-  {
-    data.assign(data.size(), 0);
-  }
-};
-
-template<class... T>
-struct Collisions
-{
-  template<class U>
-  using Set = BitBasedSet<U>;
-
-  template<class U>
-  using Map = std::unordered_map<TaggedIndex<U>, std::tuple<Set<T>...>>;
-
-  using Container = std::tuple<Map<T>...>;
-};
 
 template<class ...T, class Func>
 static void forEachTuple(std::tuple<T...> &tuple, Func func)
@@ -164,8 +91,7 @@ void Logic::update(Camera const &camera)
     }
   };
 
-  using Collisions = Collisions<TeamEntity<NanoBot, true>, TeamEntity<NanoBot, false>, TeamEntity<Battery, true>,  TeamEntity<Battery, false>, Battery>;
-
+  lines.resize(0);
   static Collisions::Container container{};
   clearTuple(container);
   auto submitCollision([](auto a, auto b)
@@ -177,61 +103,20 @@ void Logic::update(Camera const &camera)
 		       });
   Access access{*this};
   makePhysics(submitCollision, access).checkCollision(entityManager.allies.units, entityManager.allies.batteries,
-							     entityManager.ennemies.units, entityManager.ennemies.batteries,
-							     entityManager.pylones);
-  auto updateEntity([this, &access](auto index)
-  		    {
-		      auto &unit(access[index]);
-		      {
-			constexpr double const maxAccel(0.0005);
-			claws::Vect<2u, double> dir{0.0, 0.0};
-			using UnitType = std::remove_reference_t<decltype(unit)>;
+						      entityManager.ennemies.units, entityManager.ennemies.batteries,
+						      entityManager.pylones);
 
-			auto &nearEntities(std::get<Collisions::Map<UnitType>>(container)[index]);
-			auto reactToTeam([&dir, &unit, &access](auto &container)
-					 {
-					   for (auto allyIndex : container)
-					     {
-					       auto &ally(access[allyIndex]);
 
-					       claws::Vect<2u, double> posDelta(unit.fixture.pos - ally.fixture.pos);
-					       claws::Vect<2u, double> speedDelta(unit.fixture.speed - ally.fixture.speed);
-					       double coef = posDelta.length2() - 0.02;
-
-					       coef = coef > 0.02 ? 1.0 / coef : coef;
-					       dir += speedDelta * 0.005;
-					       dir += posDelta * 0.0001;
-					     }
-					 });
-			reactToTeam(std::get<Collisions::Set<TeamEntity<NanoBot, UnitType::getTeam()>>>(nearEntities));
-			reactToTeam(std::get<Collisions::Set<TeamEntity<Battery, UnitType::getTeam()>>>(nearEntities));
-			reactToTeam(std::get<Collisions::Set<Battery>>(nearEntities));
-			if (dir.length2() > maxAccel * maxAccel)
-			  dir = dir.normalized() * maxAccel;
-			(unit.fixture.speed += dir) *= 0.90;
-			unit.fixture.pos += unit.fixture.speed;
-		      }
-		      {
-			constexpr double const maxAccel = 0.001;
-			claws::Vect<2u, double> delta(unit.fixture.target - unit.fixture.pos);
-
-			if (delta.length2() > maxAccel)
-			  {
-			    if (delta.length2() > maxAccel * maxAccel)
-			      delta = delta.normalized() * maxAccel;
-			    unit.fixture.speed += delta;
-			  }
-		      }
-  		    });
-
+  for (auto &bot : entityManager.allies.units)
+    bot.hasPlayed = false;
+  for (auto &bot : entityManager.ennemies.units)
+    bot.hasPlayed = false;
   for (unsigned short i(0u); i < entityManager.allies.batteries.size(); ++i)
-    updateEntity(TaggedIndex<TeamEntity<Battery, true>>(i));
-  for (unsigned short i(0u); i < entityManager.allies.units.size(); ++i)
-    updateEntity(TaggedIndex<TeamEntity<NanoBot, true>>(i));
+    updateEntity(TaggedIndex<TeamEntity<Battery, true>>(i), entityManager.allies.batteries[i], container, access);
   for (unsigned short i(0u); i < entityManager.ennemies.batteries.size(); ++i)
-    updateEntity(TaggedIndex<TeamEntity<Battery, false>>(i));
-  for (unsigned short i(0u); i < entityManager.ennemies.units.size(); ++i)
-    updateEntity(TaggedIndex<TeamEntity<NanoBot, false>>(i));
+    updateEntity(TaggedIndex<TeamEntity<Battery, false>>(i), entityManager.ennemies.batteries[i], container, access);
+  // for (unsigned short i(0u); i < entityManager.ennemies.batteries.size(); ++i)
+  //   updateEntity(TaggedIndex<TeamEntity<Battery, false>>(i), entityManager.allies.batteries[i], updateEntity);
 }
 
 void Logic::moveSelection(claws::Vect<2u, double> target)
@@ -246,7 +131,7 @@ void Logic::moveSelection(claws::Vect<2u, double> target)
     });
   auto averagePosAndCount(std::accumulate(entityManager.allies.units.begin(), entityManager.allies.units.end(),
 					  std::accumulate(entityManager.allies.batteries.begin(), entityManager.allies.batteries.end(),
-						  std::pair<double, claws::Vect<2u, double>>{0.0, {0.0, 0.0}}, sumUnitPos), sumUnitPos));
+							  std::pair<double, claws::Vect<2u, double>>{0.0, {0.0, 0.0}}, sumUnitPos), sumUnitPos));
   auto averagePos(averagePosAndCount.second / averagePosAndCount.first);
   auto count(averagePosAndCount.first);
 
