@@ -94,7 +94,7 @@ struct BitBasedSet
 
   void clear()
   {
-    data.clear();
+    data.assign(data.size(), 0);
   }
 };
 
@@ -127,7 +127,6 @@ static void clearTuple(T &tuple)
 		   forEachTuple(pair.second, [](auto &set)
 				{
 				  set.clear();
-				  // set.reserve(10);
 				});
 	       });
 }
