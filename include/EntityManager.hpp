@@ -6,7 +6,7 @@
 #include "Physics.hpp"
 #include "TeamEntities.hpp"
 
-class	EntityManager
+class EntityManager
 {
 public:
   EntityManager();
