@@ -12,6 +12,11 @@ TextureHandler::TextureHandler()
   addTexture(TextureList::SHOOTER, "resources/Shooter.bmp");
   addTexture(TextureList::BOMBER, "resources/Bomber.bmp");
   addTexture(TextureList::PYLONE, "resources/Pylone.bmp");
+  addTexture(TextureList::SHOOTER_ENEMY, "resources/ShooterEnemy.bmp");
+  addTexture(TextureList::BRUTE_ENEMY, "resources/BruteEnemy.bmp");
+  addTexture(TextureList::BOMBER_ENEMY, "resources/BomberEnemy.bmp");
+  addTexture(TextureList::BLADES_ENEMY, "resources/BladesEnemy.bmp");
+  addTexture(TextureList::BATTERY_ENEMY, "resources/BatteryEnemy.bmp");
 }
 
 void TextureHandler::addTexture(TextureList id, std::string const& path)
