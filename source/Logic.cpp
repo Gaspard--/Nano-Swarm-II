@@ -19,12 +19,13 @@ Logic::Logic(bool animation)
   restart = false;
   gameOver = false;
   multiplier = 0;
-  for (std::size_t i(0ul); i < 10ul; ++i)
-    for (std::size_t j(0ul); j < 10ul; ++j)
+  for (std::size_t i(0ul); i < 5ul; ++i)
+    for (std::size_t j(0ul); j < 5ul; ++j)
       {
 	entityManager.allies.units.emplace_back(NanoBot::Type::BRUTE);
-	entityManager.allies.units[i * 10 + j].fixture.pos = {0.1 * static_cast<double>(i) - 0.5, 0.1 * static_cast<double>(j) - 0.5};
-	entityManager.allies.units[i * 10 + j].fixture.speed = {0.0, 0.0};
+	entityManager.allies.units[i * 5 + j].fixture.pos = {0.045 * static_cast<double>(i) - 0.5, 0.045 * static_cast<double>(j) - 0.5};
+	entityManager.allies.units[i * 5 + j].fixture.speed = {0.0, 0.0};
+	entityManager.allies.units[i * 5 + j].fixture.target = entityManager.allies.units[i * 5 + j].fixture.pos * 0.5;
       }
 }
 
@@ -58,56 +59,91 @@ void Logic::update()
 					      entityManager.pylones);
   auto updateEntity([&container](auto &unit)
   		    {
-		      constexpr double const maxAccel(0.002);
-		      using UnitType = std::remove_reference_t<decltype(unit)>;
+		      {
+			constexpr double const maxAccel = 0.001;
+			claws::Vect<2u, double> delta(unit.fixture.target - unit.fixture.pos);
 
-		      auto &near(std::get<Collisions::Map<UnitType>>(container)[&unit]);
-		      claws::Vect<2u, double> dir{0.0, 0.0};
+			if (delta.length2() > maxAccel * maxAccel)
+			  delta = delta.normalized() * maxAccel;
+			unit.fixture.speed += delta;
+		      }
+		      {
+			constexpr double const maxAccel(0.0001);
+			claws::Vect<2u, double> dir{0.0, 0.0};
+			using UnitType = std::remove_reference_t<decltype(unit)>;
 
-		      auto reactToTeam([&dir, &unit](auto &container)
-				       {
-					 for (auto *ally : container)
-					   {
-					     claws::Vect<2u, double> posDelta(unit.fixture.pos - ally->fixture.pos);
-					     claws::Vect<2u, double> speedDelta(unit.fixture.speed - ally->fixture.speed);
-					     double coef = posDelta.scalar(posDelta) - 0.01;
+			auto &near(std::get<Collisions::Map<UnitType>>(container)[&unit]);
+			auto reactToTeam([&dir, &unit](auto &container)
+					 {
+					   for (auto *ally : container)
+					     {
+					       claws::Vect<2u, double> posDelta(unit.fixture.pos - ally->fixture.pos);
+					       claws::Vect<2u, double> speedDelta(unit.fixture.speed - ally->fixture.speed);
+					       double coef = posDelta.length2() + 0.001;
 
-					     coef = coef > 0.01 ? 1 / coef : coef;
-					     dir += speedDelta * 0.005;
-					     dir += posDelta * 0.0001;
-					   }
-				       });
-		      reactToTeam(std::get<Collisions::Set<TeamEntity<NanoBot, UnitType::getTeam()>>>(near));
-		      reactToTeam(std::get<Collisions::Set<TeamEntity<Battery, UnitType::getTeam()>>>(near));
-		      reactToTeam(std::get<Collisions::Set<Battery>>(near));
-		      if (dir.length2() > maxAccel * maxAccel)
-			dir = dir.normalized() * maxAccel;
-		      unit.fixture.speed += dir;
-  		      unit.fixture.pos += unit.fixture.speed;
+					       coef = coef > 0.02 ? 1.0 / coef : coef;
+					       dir += speedDelta * 0.005;
+					       dir += posDelta * 0.0001;
+					     }
+					 });
+			reactToTeam(std::get<Collisions::Set<TeamEntity<NanoBot, UnitType::getTeam()>>>(near));
+			reactToTeam(std::get<Collisions::Set<TeamEntity<Battery, UnitType::getTeam()>>>(near));
+			reactToTeam(std::get<Collisions::Set<Battery>>(near));
+			if (dir.length2() > maxAccel * maxAccel)
+			  dir = dir.normalized() * maxAccel;
+			(unit.fixture.speed += dir) *= 0.9;
+			unit.fixture.pos += unit.fixture.speed;
+		      }
   		    });
 
   entityManager.allies.iterOnTeam(updateEntity);
   entityManager.ennemies.iterOnTeam(updateEntity);
 }
 
-  void Logic::tick(std::mutex &lock)
-  {
-    auto const now(Clock::now());
+void Logic::moveSelection(claws::Vect<2u, double> target)
+{
+  auto sumUnitPos([](auto averagePos, auto &unit) {
+      if (unit.selected)
+	{
+	  ++averagePos.first;
+	  averagePos.second += unit.fixture.pos;
+	}
+      return averagePos;
+    });
+  auto averagePosAndCount(std::accumulate(entityManager.allies.units.begin(), entityManager.allies.units.end(),
+				  std::accumulate(entityManager.allies.batteries.begin(), entityManager.allies.batteries.end(),
+						  std::pair<double, claws::Vect<2u, double>>{0.0, {0.0, 0.0}}, sumUnitPos), sumUnitPos));
+  auto averagePos(averagePosAndCount.second / averagePosAndCount.first);
+  auto update([target, &averagePos](auto &unit) {
+      if (unit.selected)
+	{
+	  claws::Vect<2u, double> offset(unit.fixture.pos - averagePos);
+	  unit.fixture.target = offset * 0.5 + target;
+	}
+    });
+  entityManager.allies.iterOnTeam(update);
+  // std::for_each(entityManager.allies.units.begin(), entityManager.allies.units.end(), update);
+  // std::for_each(entityManager.allies.batteries.begin(), entityManager.allies.batteries.end(), update);
+}
 
-    if (now > lastUpdate + getTickTime() * 2)
-      {
-	lastUpdate = now;
-	return ;
-      }
-    lastUpdate += getTickTime();
-    if (now < lastUpdate)
-      std::this_thread::sleep_for(lastUpdate - now);
+void Logic::tick(std::mutex &lock)
+{
+  auto const now(Clock::now());
 
+  if (now > lastUpdate + getTickTime() * 2)
     {
-      std::lock_guard<std::mutex> scopedLock(lock);
-      update();
+      lastUpdate = now;
+      return ;
     }
+  lastUpdate += getTickTime();
+  if (now < lastUpdate)
+    std::this_thread::sleep_for(lastUpdate - now);
+
+  {
+    std::lock_guard<std::mutex> scopedLock(lock);
+    update();
   }
+}
 
 void Logic::addToScore(int add)
 {
@@ -184,14 +220,11 @@ void Logic::handleMouse(Display const &display, GLFWwindow *, Mouse mouse)
   claws::Vect<2u, float> const size(display.getSize());
 
   mousePos = {mouse.x, mouse.y};
+  mousePos *= 2.0;
   mousePos -= claws::Vect<2u, double>(size[0] - size[1], 0.0);
   mousePos /= claws::Vect<2u, double>(size[1], -size[1]);
   mousePos += claws::Vect<2u, double>(-1.0, 1.0);
-}
-
-claws::Vect<2u, double> Logic::getMouse(Display const &display) const
-{
-  return display.getCamera().unapply(mousePos);
+  // return display.getCamera().unapply(mousePos);
 }
 
 void Logic::handleButton(GLFWwindow *, Button button)
@@ -209,6 +242,19 @@ void Logic::handleButton(GLFWwindow *, Button button)
 	{
 	  selectBots();
 	  leftClick = false;
+	}
+    }
+  // RIGHT BUTTON
+  else if (button.button == GLFW_MOUSE_BUTTON_RIGHT)
+    {
+      if (button.action == GLFW_PRESS)
+	{
+	  rightClick = true;
+	  moveSelection(mousePos);
+	}
+      else
+	{
+	  rightClick = false;
 	}
     }
 }
@@ -231,11 +277,6 @@ bool Logic::getGameOver(void) const
 
 void Logic::selectBots()
 {
-  // std::cout << mousePos.x() << " "
-  // 	    << mousePos.y() << " "
-  // 	    << dragOrigin.x() << " "
-  // 	    << dragOrigin.y() << " "
-  // 	    << std::endl;
   claws::Vect<2u, double> start(std::min(mousePos.x(), dragOrigin.x()), std::min(mousePos.y(), dragOrigin.y()));
   claws::Vect<2u, double> end(std::max(mousePos.x(), dragOrigin.x()), std::max(mousePos.y(), dragOrigin.y()));
   selectRect(start, end);
@@ -243,21 +284,11 @@ void Logic::selectBots()
 
 void Logic::selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> end)
 {
-  std::cout << "select rect" << std::endl;
   auto& allies = entityManager.allies;
-  std::cout << allies.units.size() << std::endl;
   std::for_each(allies.units.begin(), allies.units.end(), [start, end](NanoBot& bot){
-      // std::cout << bot.fixture.pos.x() << " "
-      // 		<< bot.fixture.pos.y() << " "
-      // 		<< start.x() << " "
-      // 		<< start.y() << " "
-      // 		<< end.x() << " "
-      // 		<< end.y() << " "
-      // 		<< std::endl;
       if (bot.fixture.pos.x() >= start.x() && bot.fixture.pos.x() <= end.x() &&
 	  bot.fixture.pos.y() >= start.y() && bot.fixture.pos.y() <= end.y())
 	{
-	  std::cout << "selected" << std::endl;
 	  bot.setSelection(true);
 	}
       else
@@ -267,7 +298,6 @@ void Logic::selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> en
       if (battery.fixture.pos.x() >= start.x() && battery.fixture.pos.x() <= end.x() &&
 	  battery.fixture.pos.y() >= start.y() && battery.fixture.pos.y() <= end.y())
 	{
-	  std::cout << "selected" << std::endl;
 	  battery.setSelection(true);
 	}
       else

@@ -243,7 +243,7 @@ void Display::copyRenderData(Logic const &logic)
   auto renderEntity = [this](auto const &entity)
     {
       displayInfo.entityRenderables[textureHandler.getTexture(entity.getTexture())]
-      .push_back({{0.0f, 0.0f}, {1.0f, 1.0f}, static_cast<claws::Vect<2u, float>>(entity.fixture.pos), {1.0f, 0.0f}});
+      .push_back({{0.0f, 0.0f}, {1.0f, 1.0f}, static_cast<claws::Vect<2u, float>>(entity.fixture.pos), static_cast<claws::Vect<2u, float>>(entity.fixture.speed.normalized())});
     };
 
   displayInfo.entityRenderables.clear();

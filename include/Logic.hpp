@@ -62,6 +62,7 @@ public:
   void checkEvents(Display const &);
   void selectRect(claws::Vect<2u, double>, claws::Vect<2u, double>, claws::Vect<4u, bool>);
   void update();
+  void moveSelection(claws::Vect<2u, double> target);
   void tick(std::mutex &lock);
   void addToScore(int);
 
@@ -73,7 +74,6 @@ public:
 
   EntityManager	getEntityManager(void) const;
   claws::Vect<2, double> getPlayerPos(void) const;
-  claws::Vect<2u, double> getMouse(Display const &) const;
   std::string	getScore(void) const;
   std::string	getTime(void) const;
   bool          getGameOver(void) const;
