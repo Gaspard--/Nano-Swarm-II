@@ -22,6 +22,8 @@ Logic::Logic(bool animation)
   restart = false;
   gameOver = false;
   multiplier = 0;
+  level = 0;
+  spawnDelay = 0;
   for (std::size_t i(0ul); i < 10ul; ++i)
     for (std::size_t j(0ul); j < 50ul; ++j)
       {
@@ -262,6 +264,15 @@ void Logic::moveSelection(claws::Vect<2u, double> target)
 
 void Logic::tick(std::mutex &lock, Camera const &camera)
 {
+  if (spawnDelay == 0)
+    {
+      ++level;
+      spawnEnemies(camera);
+      spawnDelay = 15000 / (level + 50);
+    }
+  else
+    --spawnDelay;
+
   auto const now(Clock::now());
 
   if (now > lastUpdate + getTickTime() * 2)
@@ -286,6 +297,43 @@ void Logic::addToScore(int add)
 void Logic::addToTimer(unsigned int add)
 {
   timer += add;
+}
+
+void Logic::createBot(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed, bool ally, NanoBot::Type type)
+{
+  if (ally)
+  {
+    entityManager.allies.units.emplace_back(type);
+	  entityManager.allies.units.back().fixture.pos = pos;
+	  entityManager.allies.units.back().fixture.speed = speed;
+	  entityManager.allies.units.back().fixture.target = entityManager.allies.units.back().fixture.pos * 0.5;
+  }
+  else
+  {
+    entityManager.ennemies.units.emplace_back(type);
+	  entityManager.ennemies.units.back().fixture.pos = pos;
+	  entityManager.ennemies.units.back().fixture.speed = speed;
+	  entityManager.ennemies.units.back().fixture.target = entityManager.ennemies.units.back().fixture.pos * 0.5;
+  }
+  // add score
+  /*if (ally)
+    {
+      ++nbAlly;
+      score.score += Score::BOT_CREATED;
+      score.botCreated += 1;
+    }*/
+}
+
+void Logic::spawnEnemies(Camera const &camera)
+{
+  claws::Vect<2u, double> spawnCenter((claws::Vect<2u, double>{sin(level * level), cos(level * level)} - camera.offset) * 3.0 / camera.zoom);
+
+  std::cout << "X: " << spawnCenter[0] << "        Y: " << spawnCenter[1] << std::endl;
+  for (unsigned int i(0); i < (10 + level) / 3; i++)
+    createBot(claws::Vect<2u, double>{(i % 5) * 0.05, (i / 5) * 0.05} + spawnCenter,
+              {0, 0},
+	            false,
+              NanoBot::Type::BRUTE);
 }
 
 std::string Logic::getScore(void) const
