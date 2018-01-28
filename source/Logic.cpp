@@ -24,7 +24,7 @@ Logic::Logic(bool animation)
   for (std::size_t i(0ul); i < 10ul; ++i)
     for (std::size_t j(0ul); j < 50ul; ++j)
       {
-	entityManager.allies.units.emplace_back(NanoBot::Type::BRUTE);
+	entityManager.allies.units.emplace_back((i & 1) ? NanoBot::Type::BRUTE :  NanoBot::Type::SHOOTER);
 	entityManager.allies.units[i * 50 + j].fixture.pos = {0.045 * static_cast<double>(i) - 0.5, 0.045 * static_cast<double>(j) - 0.5};
 	entityManager.allies.units[i * 50 + j].fixture.speed = {0.0, 0.0};
 	entityManager.allies.units[i * 50 + j].fixture.target = entityManager.allies.units[i * 50 + j].fixture.pos * 0.5;
