@@ -21,13 +21,21 @@ Logic::Logic(bool animation)
   restart = false;
   gameOver = false;
   multiplier = 0;
-  for (std::size_t i(0ul); i < 40ul; ++i)
+  for (std::size_t i(0ul); i < 10ul; ++i)
     for (std::size_t j(0ul); j < 50ul; ++j)
       {
 	entityManager.allies.units.emplace_back(NanoBot::Type::BRUTE);
 	entityManager.allies.units[i * 50 + j].fixture.pos = {0.045 * static_cast<double>(i) - 0.5, 0.045 * static_cast<double>(j) - 0.5};
 	entityManager.allies.units[i * 50 + j].fixture.speed = {0.0, 0.0};
 	entityManager.allies.units[i * 50 + j].fixture.target = entityManager.allies.units[i * 50 + j].fixture.pos * 0.5;
+      }
+  for (std::size_t i(0ul); i < 10ul; ++i)
+    for (std::size_t j(0ul); j < 50ul; ++j)
+      {
+	entityManager.allies.batteries.emplace_back(10);
+	entityManager.allies.batteries[i * 50 + j].fixture.pos = {0.045 * static_cast<double>(i) - 0.455, 0.045 * static_cast<double>(j) - 0.5};
+	entityManager.allies.batteries[i * 50 + j].fixture.speed = {0.0, 0.0};
+	entityManager.allies.batteries[i * 50 + j].fixture.target = entityManager.allies.units[i * 50 + j].fixture.pos * 0.5;
       }
 }
 
