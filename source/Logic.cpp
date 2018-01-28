@@ -222,7 +222,7 @@ void Logic::spawnEnemies(Camera const &camera)
   std::cout << "X: " << spawnCenter[0] << "        Y: " << spawnCenter[1] << std::endl;
   for (unsigned int i(0); i < (10 + level) / 3; i++)
     createBot(claws::Vect<2u, double>{(i % 5) * 0.05, (i / 5) * 0.05} + spawnCenter,
-              {0, 0},
+              {0.0, 0.0},
 	            false,
               NanoBot::Type::BRUTE);
 }
