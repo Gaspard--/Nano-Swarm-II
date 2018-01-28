@@ -13,6 +13,7 @@ private:
   unsigned int cooldown;
 
 public:
+  bool hasPlayed;
   using CollisionContainer = std::map<Entity *, std::set<Entity *>>;
 
   enum class Type : std::size_t

@@ -31,5 +31,6 @@ struct DisplayInfo
 {
   std::unordered_map<GLuint, std::vector<Renderable>> renderables;
   std::unordered_map<GLuint, std::vector<EntityRenderable>> entityRenderables;
+  std::vector<std::pair<claws::Vect<2u, float>, claws::Vect<2u, float>>> lines;
   std::vector<HudBlock> hud;
 };

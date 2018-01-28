@@ -33,10 +33,10 @@ private:
   FreeTypeLib fontHandler;
   RenderContext textureContext;
   glBuffer textureBuffer;
-  RenderContext rectContext;
-  glBuffer rectBuffer;
   RenderContext textContext;
   glBuffer textBuffer;
+  RenderContext rectContext;
+  glBuffer rectBuffer;
   Texture planet;
   Texture planetBackground;
   Texture background;
@@ -60,6 +60,8 @@ public:
   void displayText(std::string const &txt, unsigned int fontSize, claws::Vect<2u, float> step, claws::Vect<2u, float> textPos,  claws::Vect<2u, float> rotation, claws::Vect<3u, float> color);
 
   void displayRect(Rect const &);
+
+  void displayLines(std::vector<std::pair<claws::Vect<2u, float>, claws::Vect<2u, float>>> const &lines);
 
   void displayHudBlock(const HudBlock &block);
 

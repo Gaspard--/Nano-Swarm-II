@@ -64,6 +64,7 @@ Display::Display()
   , fontHandler("./resources/ObelixPro-Broken-cyr.ttf")
   , textureContext(contextFromFiles("texture"))
   , textContext(contextFromFiles("text"))
+  , rectContext(contextFromFiles("rect"))
   , planetRenderTexture({1024u, 1024u})
   , size{0.0f, 0.0f}
   , dim{0.0f, 0.0f}
@@ -97,7 +98,7 @@ Display::Display()
     glBindBuffer(GL_ARRAY_BUFFER, rectBuffer);
     glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(glGetAttribLocation(textContext.program, "pos"), 2, GL_FLOAT, false, 2 * sizeof(float), nullptr);
+    glVertexAttribPointer(glGetAttribLocation(rectContext.program, "pos"), 2, GL_FLOAT, false, 2 * sizeof(float), nullptr);
   }
   {
     Bind<RenderContext> bind(textContext);
@@ -181,6 +182,24 @@ void Display::displayRect(Rect const &rect)
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
+void Display::displayLines(std::vector<std::pair<claws::Vect<2u, float>, claws::Vect<2u, float>>> const &lines)
+{
+  Bind<RenderContext> bind(rectContext);
+  GLuint bufferSize(static_cast<GLuint>(lines.size() * 4u));
+  std::unique_ptr<float[]> buffer(new float[bufferSize]);
+
+  for (unsigned int j(0u); j != lines.size(); ++j)
+    {
+      std::copy(&lines[j].first[0u], &lines[j].first[2u], &buffer[j * 4u]);
+      std::copy(&lines[j].second[0u], &lines[j].second[2u], &buffer[j * 4u + 2u]);
+    }
+  glBindBuffer(GL_ARRAY_BUFFER, rectBuffer);
+  my_opengl::setUniform(dim, "dim", rectContext.program);
+  my_opengl::setUniform({0.3f, 0.95f, 1.0f, 1.0f}, "rect_color", rectContext.program);
+  glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(float), buffer.get(), GL_STATIC_DRAW);
+  glDrawArrays(GL_LINES, 0, lines.size() * 2);
+}
+
 void Display::displayHudBlock(const HudBlock & block)
 {
 	displayRect(block.background);
@@ -217,11 +236,11 @@ void Display::displayRenderableAsHUD(Renderable const& renderable, GLuint textur
 void Display::render()
 {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  float scale(0.0f);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  float scale(0.1f);
   glClearColor(scale, scale, scale, scale);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
   for (auto const &renderables : displayInfo.entityRenderables) {
     displayRenderables(renderables.second.begin(), static_cast<GLuint>(renderables.second.size()), renderables.first);
@@ -229,6 +248,8 @@ void Display::render()
   for (auto const &renderables : displayInfo.renderables) {
     displayRenderables(renderables.second.begin(), static_cast<GLuint>(renderables.second.size()), renderables.first);
   }
+  displayLines(displayInfo.lines);
+  displayInfo.lines.resize(0u);
   displayInterface();
   glDisable(GL_BLEND);
   glfwSwapBuffers(window.get());
@@ -301,6 +322,12 @@ void Display::copyRenderData(Logic const &logic)
 				       logic.getScore(),
 				       256,
 				       { 1.0f, 1.0f, 1.0f });
+
+  displayInfo.lines.resize(logic.lines.size());
+  std::transform(logic.lines.begin(), logic.lines.end(),
+  		 displayInfo.lines.begin(), [this](auto const &pair){
+  		   return std::pair<claws::Vect<2u, float>, claws::Vect<2u, float>>{camera.apply(pair.first), camera.apply(pair.second)};
+  		 });
 }
 
 bool Display::isRunning() const
