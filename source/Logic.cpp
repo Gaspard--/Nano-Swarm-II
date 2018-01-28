@@ -88,7 +88,7 @@ struct BitBasedSet
   void emplace(TaggedIndex<T> index)
   {
     if (data.size() <= index.data)
-      data.resize(index.data + 1);
+      data.resize(index.data + 1, 0);
     data[index.data] = true;
   }
 
@@ -221,7 +221,7 @@ void Logic::update()
 			    unit.fixture.speed += delta;
 			  }
 		      }
-
+		      
   		    });
 
   for (unsigned short i(0u); i < entityManager.allies.batteries.size(); ++i)
