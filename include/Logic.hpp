@@ -12,6 +12,7 @@
 # include "Laser.hpp"
 
 class Display;
+class Camera;
 
 class Logic
 {
@@ -52,8 +53,8 @@ private:
 
   void handleKey(GLFWwindow *window, Key key);
   void handleMouse(Display const &, GLFWwindow *window, Mouse mouse);
-  void handleButton(GLFWwindow *window, Button button);
-  void selectBots();
+  void handleButton(GLFWwindow *window, Button button, Display const &);
+  void selectBots(Display const &);
   void selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> end);
 
 public:
@@ -62,9 +63,9 @@ public:
   void handleEvent(Display const &, Event const& event);
   void checkEvents(Display const &);
   void selectRect(claws::Vect<2u, double>, claws::Vect<2u, double>, claws::Vect<4u, bool>);
-  void update();
+  void update(Camera const &);
   void moveSelection(claws::Vect<2u, double> target);
-  void tick(std::mutex &lock);
+  void tick(std::mutex &lock, Camera const &);
   void addToScore(int);
   void addToTimer(unsigned int);
 
@@ -75,7 +76,7 @@ public:
   }
 
   EntityManager	getEntityManager(void) const;
-  claws::Vect<2, double> getPlayerPos(void) const;
+  claws::Vect<2, double> getMousePos(Display const &) const;
   claws::Vect<2u, double> getMouse(Display const &) const;
   std::string	getTimer(void) const;
   std::string	getScore(void) const;

@@ -7,6 +7,7 @@
 #include "Logic.hpp"
 #include "Input.hpp"
 #include "Display.hpp"
+#include "Camera.hpp"
 
 Logic::Logic(bool animation)
   : lastUpdate(Clock::now()),
@@ -131,7 +132,7 @@ static void clearTuple(T &tuple)
 	       });
 }
 
-void Logic::update()
+void Logic::update(Camera const &camera)
 {
   struct Access
   {
@@ -259,7 +260,7 @@ void Logic::moveSelection(claws::Vect<2u, double> target)
   entityManager.allies.iterOnTeam(update);
 }
 
-void Logic::tick(std::mutex &lock)
+void Logic::tick(std::mutex &lock, Camera const &camera)
 {
   auto const now(Clock::now());
 
@@ -270,7 +271,7 @@ void Logic::tick(std::mutex &lock)
     }
   {
     std::lock_guard<std::mutex> scopedLock(lock);
-    update();
+    update(camera);
     lastUpdate += getTickTime();
   }
   if (now < lastUpdate)
@@ -326,7 +327,7 @@ void Logic::handleEvent(Display const &display, Event const& event)
           handleMouse(display, event.window, event.val.mouse);
           break;
         case Event::BUTTON:
-          handleButton(event.window, event.val.button);
+          handleButton(event.window, event.val.button, display);
           break;
 	default:
 	  break;
@@ -350,6 +351,10 @@ void Logic::checkEvents(Display const &display)
 {
   // if (display.isKeyPressed(GLFW_KEY_SPACE))
   //   selectAllBots();
+  if (rightClick)
+    {
+      moveSelection(getMousePos(display));
+    }
 }
 
 void Logic::handleMouse(Display const &display, GLFWwindow *, Mouse mouse)
@@ -361,10 +366,9 @@ void Logic::handleMouse(Display const &display, GLFWwindow *, Mouse mouse)
   mousePos -= claws::Vect<2u, double>(size[0] - size[1], 0.0);
   mousePos /= claws::Vect<2u, double>(size[1], -size[1]);
   mousePos += claws::Vect<2u, double>(-1.0, 1.0);
-  mousePos = display.getCamera().unapply(mousePos);
 }
 
-void Logic::handleButton(GLFWwindow *, Button button)
+void Logic::handleButton(GLFWwindow *, Button button, Display const &display)
 {
   // if (button.button != GLFW_MOUSE_BUTTON_LEFT || button.action != GLFW_PRESS || gameOver)
   //   return ;
@@ -372,12 +376,12 @@ void Logic::handleButton(GLFWwindow *, Button button)
     {
       if (button.action == GLFW_PRESS)
 	{
-	  dragOrigin = mousePos;
+	  dragOrigin = getMousePos(display);
 	  leftClick = true;
 	}
       else
 	{
-	  selectBots();
+	  selectBots(display);
 	  leftClick = false;
 	}
     }
@@ -387,7 +391,6 @@ void Logic::handleButton(GLFWwindow *, Button button)
       if (button.action == GLFW_PRESS)
 	{
 	  rightClick = true;
-	  moveSelection(mousePos);
 	}
       else
 	{
@@ -396,9 +399,9 @@ void Logic::handleButton(GLFWwindow *, Button button)
     }
 }
 
-claws::Vect<2, double> Logic::getPlayerPos(void) const
+claws::Vect<2, double> Logic::getMousePos(Display const &display) const
 {
-  return {0.0, 0.0};
+  return display.getCamera().unapply(mousePos);
 }
 
 
@@ -412,10 +415,10 @@ bool Logic::getGameOver(void) const
   return gameOver;
 }
 
-void Logic::selectBots()
+void Logic::selectBots(Display const &display)
 {
-  claws::Vect<2u, double> start(std::min(mousePos.x(), dragOrigin.x()), std::min(mousePos.y(), dragOrigin.y()));
-  claws::Vect<2u, double> end(std::max(mousePos.x(), dragOrigin.x()), std::max(mousePos.y(), dragOrigin.y()));
+  claws::Vect<2u, double> start(std::min(getMousePos(display).x(), dragOrigin.x()), std::min(getMousePos(display).y(), dragOrigin.y()));
+  claws::Vect<2u, double> end(std::max(getMousePos(display).x(), dragOrigin.x()), std::max(getMousePos(display).y(), dragOrigin.y()));
   selectRect(start, end);
 }
 
