@@ -80,6 +80,8 @@ TextureHandler::TextureList NanoBot::getTexture() const noexcept
     case Type::WORKER:
       return TextureHandler::TextureList::WORKER;
     case Type::BRUTE:
+      if (cooldown > 50)
+	return TextureHandler::TextureList::BLADES;
       return TextureHandler::TextureList::BRUTE;
     case Type::SHOOTER:
       return TextureHandler::TextureList::SHOOTER;

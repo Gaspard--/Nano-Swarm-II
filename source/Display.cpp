@@ -298,8 +298,10 @@ void Display::copyRenderData(Logic const &logic)
 	       static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(logic.getTickTime()).count()));
   auto renderEntity = [this, delta](auto const &entity)
     {
-      displayInfo.entityRenderables[textureHandler.getTexture(entity.getTexture())]
-      .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, camera.apply(entity.fixture.pos + entity.fixture.speed * delta), 0.04f * camera.zoom,static_cast<claws::Vect<2u, float>>(rotate(entity.fixture.speed.normalized(), {0.0f, -1.0f}))});
+      Texture entityTexture(textureHandler.getTexture(entity.getTexture()));
+
+      displayInfo.entityRenderables[entityTexture]
+      .push_back({{0.0f, 0.0f}, {1.0f / 7.0f, 1.0f}, camera.apply(entity.fixture.pos + entity.fixture.speed * delta), 0.04f * camera.zoom,static_cast<claws::Vect<2u, float>>(rotate(entity.fixture.speed.normalized(), {0.0f, -1.0f}))});
     };
 
   displayInfo.entityRenderables.clear();
