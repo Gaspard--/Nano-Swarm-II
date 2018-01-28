@@ -28,3 +28,10 @@ Texture TextureHandler::getTexture(TextureList id) const
 {
   return (_textures.at(id));
 }
+
+TextureFull TextureHandler::getTextureFull(TextureList id) const
+{
+  TextureFull textureFull{_textures.at(id), _getFrames(static_cast<int>(id))};
+
+  return (textureFull);
+}

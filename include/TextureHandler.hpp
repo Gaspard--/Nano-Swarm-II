@@ -5,6 +5,12 @@
 # include <memory>
 # include "my_opengl.hpp"
 
+struct TextureFull
+{
+  Texture texture;
+  int frame;
+};
+
 class TextureHandler
 {
 public :
@@ -34,6 +40,7 @@ public :
 
   void addTexture(TextureList, std::string const&);
   Texture getTexture(TextureList) const;
+  TextureFull getTextureFull(TextureList) const;
   const Texture& operator[](TextureList id) {
 	  return _textures.at(id);
   };
@@ -42,6 +49,26 @@ private:
 
   static std::unique_ptr<TextureHandler> _instance;
   std::map<TextureList, Texture> _textures;
+  static constexpr int _getFrames(int id)
+  {
+    constexpr int frames[static_cast<int>(TextureList::countTexture)] =
+      {
+	2, // BATTERY
+	1, // UNIT
+	1, // WORKER
+	5, // BRUTE
+	1, // BLADES
+	8, // SHOOTER
+	1, // BOMBER
+	1, // PYLONE
+	8, // SHOOTER E
+	5, // BRUTE E
+	1, // BOMBER E
+	1, // BLADES E
+	2 // BATTERY E
+      };
+    return (frames[id]);
+  }
 };
 
 #endif /* !TEXTUREHANDLER_HPP_ */
