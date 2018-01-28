@@ -221,7 +221,6 @@ void Logic::update()
 			    unit.fixture.speed += delta;
 			  }
 		      }
-		      
   		    });
 
   for (unsigned short i(0u); i < entityManager.allies.batteries.size(); ++i)
@@ -258,8 +257,6 @@ void Logic::moveSelection(claws::Vect<2u, double> target)
 	}
     });
   entityManager.allies.iterOnTeam(update);
-  // std::for_each(entityManager.allies.units.begin(), entityManager.allies.units.end(), update);
-  // std::for_each(entityManager.allies.batteries.begin(), entityManager.allies.batteries.end(), update);
 }
 
 void Logic::tick(std::mutex &lock)
@@ -364,7 +361,7 @@ void Logic::handleMouse(Display const &display, GLFWwindow *, Mouse mouse)
   mousePos -= claws::Vect<2u, double>(size[0] - size[1], 0.0);
   mousePos /= claws::Vect<2u, double>(size[1], -size[1]);
   mousePos += claws::Vect<2u, double>(-1.0, 1.0);
-  // return display.getCamera().unapply(mousePos);
+  mousePos = display.getCamera().unapply(mousePos);
 }
 
 void Logic::handleButton(GLFWwindow *, Button button)

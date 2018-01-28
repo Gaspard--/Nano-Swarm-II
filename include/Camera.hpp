@@ -3,7 +3,7 @@
 struct Camera
 {
   claws::Vect<2u, double> offset{0.0, 0.0};
-  claws::Vect<2u, float> zoom{0.5f, 0.37f};
+  float zoom{1.0f};
 
   template<class T>
   constexpr claws::Vect<2u, float> apply(claws::Vect<2u, T> pos) const
