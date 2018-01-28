@@ -180,6 +180,15 @@ void Display::displayRect(Rect const &rect)
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
+void Display::displayHudBlock(const HudBlock & block)
+{
+	displayRect(block.background);
+	displayText(block.message, block.fontSize, {8.0f, 8.0f}, 
+		block.rectMessage.pos,
+		block.rectMessage.size,
+		block.colorMessage);
+}
+
 void Display::displayRenderableAsHUD(Renderable const& renderable, GLuint texture)
 {
   Bind<RenderContext> bind(textureContext);
@@ -234,13 +243,17 @@ void Display::displayInterface()
 	claws::Vect<2u, float>(1.0f, 1.0f) },
     textureHandler[TextureHandler::TextureList::TEST]);
 
+	for (auto it : displayInfo.hud)
+		displayHudBlock(it);
 
-  displayText(displayInfo.time, 256, { 0.075f, 0.075f }, { 0.8f, 0.8f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f });
+	//displayText(displayInfo.time, 256, { 0.075f, 0.075f }, { 0.8f, 0.8f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f });
 }
 
 void Display::copyRenderData(Logic const &logic)
 {
-  auto renderEntity = [this](auto const &entity)
+	auto renderEntity = [this](auto const &entity)
+	/*	if (true != static_cast<int>(0))
+			renderEntity = NULL;*/
     {
       displayInfo.entityRenderables[textureHandler.getTexture(entity.getTexture())]
       .push_back({{0.0f, 0.0f}, {1.0f, 1.0f}, static_cast<claws::Vect<2u, float>>(entity.fixture.pos), static_cast<claws::Vect<2u, float>>(entity.fixture.speed.normalized())});
@@ -251,6 +264,18 @@ void Display::copyRenderData(Logic const &logic)
     .push_back({{0.0f, 0.0f}, {1.0f / 6.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}});
   logic.getEntityManager().allies.iterOnTeam(renderEntity);
   logic.getEntityManager().ennemies.iterOnTeam(renderEntity);
+
+  hud.resize(ID_BLOCK::nb_bloc);
+  hud[ID_BLOCK::BLOC_TIMER] = HudBlock(Rect({}, {}, {}),
+	  Rect({}, {}, {}),
+	  logic.getTimer(),
+	  256,
+	  { 1.0f, 1.0f, 1.0f });
+  hud[ID_BLOCK::BLOC_SCORE] = HudBlock(Rect({}, {}, {}),
+	  Rect({}, {}, {}),
+	  logic.getScore(),
+	  256,
+	  { 1.0f, 1.0f, 1.0f });
 }
 
 bool Display::isRunning() const

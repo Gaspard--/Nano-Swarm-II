@@ -22,8 +22,8 @@ private:
 
   EntityManager entityManager;
 
-  unsigned int time;
-  long unsigned int score;
+  unsigned int timer;
+  unsigned long int score;
   double multiplier;
 
   bool restart;
@@ -65,6 +65,7 @@ public:
   void moveSelection(claws::Vect<2u, double> target);
   void tick(std::mutex &lock);
   void addToScore(int);
+  void addToTimer(unsigned int);
 
   template<class... Args>
   void addLaser(Args &&...args)
@@ -74,8 +75,9 @@ public:
 
   EntityManager	getEntityManager(void) const;
   claws::Vect<2, double> getPlayerPos(void) const;
+  claws::Vect<2u, double> getMouse(Display const &) const;
+  std::string	getTimer(void) const;
   std::string	getScore(void) const;
-  std::string	getTime(void) const;
   bool          getGameOver(void) const;
   bool          getRestart(void) const;
   bool          getStartPage(void) const;

@@ -45,6 +45,7 @@ private:
   RenderTexture planetRenderTexture;
   claws::Vect<2u, float> size;
   claws::Vect<2u, float> dim;
+  std::vector<HudBlock>	hud;
 
   DisplayInfo displayInfo;
 
@@ -59,6 +60,8 @@ public:
   void displayText(std::string const &txt, unsigned int fontSize, claws::Vect<2u, float> step, claws::Vect<2u, float> textPos,  claws::Vect<2u, float> rotation, claws::Vect<3u, float> color);
 
   void displayRect(Rect const &);
+
+  void displayHudBlock(const HudBlock &block);
 
   void displayInterface();
 

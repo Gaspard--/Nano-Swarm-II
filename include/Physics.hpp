@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <algorithm>
 #include <numeric>
 #include <tuple>
@@ -72,19 +73,24 @@ private:
 	auto isAbove([mid, i](auto const &a){
 	    return a->fixture.pos[i] - a->fixture.getRadius() < mid[i];
 	  });
-	checkCollisionImpl(begin, {std::partition(std::get<It>(begin), std::get<It>(end), isBelow)...}, level + 1);
-	checkCollisionImpl(begin, {std::partition(std::get<It>(begin), std::get<It>(end), isAbove)...}, level + 1);
+	checkCollisionImpl(begin, std::tuple<It, ...>{std::partition(std::get<It>(begin), std::get<It>(end), isBelow)...}, level + 1);
+	checkCollisionImpl(begin, std::tuple<It, ...>{std::partition(std::get<It>(begin), std::get<It>(end), isAbove)...}, level + 1);
       }
   }
+
+  template<class T>
+  struct vector_type {
+	  using type = std::vector<std::iterator_traits<T>::value_type>;
+  };
 
   template<class... T>
   void prepareCollisionCheck(std::tuple<T...> begin, std::tuple<T...> end)
   {
-    std::tuple<std::vector<decltype(&*std::get<T>(begin))>...> ptrStorage;
+    std::tuple<vector_type<T>::type...> ptrStorage;
 
-    (void)expander{(std::get<std::vector<decltype(&*std::get<T>(begin))>>(ptrStorage).resize(std::get<T>(end) - std::get<T>(begin)), 0)...};
+    (void)expander{(std::get<std::vector<decltype(&*std::decltype<T>())>>(ptrStorage).resize(std::get<T>(end) - std::get<T>(begin)), 0)...};
     (void)expander{(std::transform(std::get<T>(begin), std::get<T>(end), std::get<std::vector<decltype(&*std::get<T>(begin))>>(ptrStorage).begin(), [](auto &a){return &a;}), 0)...};
-    checkCollisionImpl(std::tuple<typename std::vector<decltype(&*std::get<T>(begin))>::iterator...>{std::get<std::vector<decltype(&*std::get<T>(begin))>>(ptrStorage).begin()...},
+    checkCollisionImpl(std::tuple<typename std::vector<decltype(&*std::decltype<T>())>::iterator...>{std::get<std::vector<decltype(&*std::get<T>(begin))>>(ptrStorage).begin()...},
 		       std::tuple<typename std::vector<decltype(&*std::get<T>(begin))>::iterator...>{std::get<std::vector<decltype(&*std::get<T>(begin))>>(ptrStorage).end()...},
 		       0);
   }

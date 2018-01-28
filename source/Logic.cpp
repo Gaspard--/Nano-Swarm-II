@@ -2,6 +2,11 @@
 #include <mutex>
 #include <set>
 #include <unordered_set>
+<<<<<<< Updated upstream
+=======
+#include <type_traits>
+
+>>>>>>> Stashed changes
 #include "Logic.hpp"
 #include "Input.hpp"
 #include "Display.hpp"
@@ -14,7 +19,7 @@ Logic::Logic(bool animation)
     rightClick(false),
     lastUpdate(Clock::now())
 {
-  time = 0;
+  timer = 0;
   score = 0;
   restart = false;
   gameOver = false;
@@ -94,6 +99,7 @@ void Logic::update()
 			(unit.fixture.speed += dir) *= 0.9;
 			unit.fixture.pos += unit.fixture.speed;
 		      }
+
   		    });
 
   entityManager.allies.iterOnTeam(updateEntity);
@@ -150,9 +156,14 @@ void Logic::addToScore(int add)
   score += static_cast<int>(add * (multiplier == 0 ? 1 : multiplier));
 }
 
+void Logic::addToTimer(unsigned int add)
+{
+  timer += add;
+}
+
 std::string Logic::getScore(void) const
 {
-  return ("score = " + std::to_string(score));
+  return ("Score = " + std::to_string(score));
 }
 
 EntityManager Logic::getEntityManager(void) const
@@ -160,9 +171,9 @@ EntityManager Logic::getEntityManager(void) const
   return entityManager;
 }
 
-std::string Logic::getTime(void) const
+std::string Logic::getTimer(void) const
 {
-  std::size_t secondTime((time * getTickTime().count()) / 1000000ul);
+  std::size_t secondTime((timer * getTickTime().count()) / 1000000ul);
   std::string   toReturn;
 
   if (secondTime / 60 >= 10)
@@ -225,6 +236,11 @@ void Logic::handleMouse(Display const &display, GLFWwindow *, Mouse mouse)
   mousePos /= claws::Vect<2u, double>(size[1], -size[1]);
   mousePos += claws::Vect<2u, double>(-1.0, 1.0);
   // return display.getCamera().unapply(mousePos);
+}
+
+std::vector<HudBlock> Logic::getAllHud(void) const
+{
+	return hud;
 }
 
 void Logic::handleButton(GLFWwindow *, Button button)
