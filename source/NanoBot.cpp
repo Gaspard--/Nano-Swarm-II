@@ -2,10 +2,22 @@
 #include "NanoBot.hpp"
 #include "Logic.hpp"
 
+void NanoBot::ia(EntityManager& em)
+{
+  // go near ennemies
+  // if energy is available go closer to ennemy
+  // shoot if there is energy close-by
+}
+
+void NanoBot::update()
+{
+}
+
+
 void NanoBot::shooterAction(CollisionContainer &nearBots, Logic &logic)
 {
   static constexpr double attackRange = 0.05;
-  static constexpr double cooldown = 300;
+  static constexpr unsigned cooldown = 300;
 
   for (auto &entity : nearBots[this])
     {
@@ -19,10 +31,11 @@ void NanoBot::shooterAction(CollisionContainer &nearBots, Logic &logic)
 	}
     }
 }
+
 void NanoBot::workerAction(CollisionContainer &nearBots, Logic &logic)
 {
   static constexpr double collectRange = 0.01;
-  static constexpr double cooldown = 180;
+  static constexpr unsigned cooldown = 180;
 
   for (auto &entity : nearBots[this])
     {
@@ -33,7 +46,7 @@ void NanoBot::workerAction(CollisionContainer &nearBots, Logic &logic)
 void NanoBot::bruteAction(CollisionContainer &nearBots, Logic &logic)
 {
   static constexpr double attackRange = 0.01;
-  static constexpr double cooldown = 60;
+  static constexpr unsigned cooldown = 60;
 
   for (auto &entity : nearBots[this])
     {

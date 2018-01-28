@@ -54,25 +54,30 @@ private:
   // mouse variables
   bool leftClick;
   bool rightClick;
+  // key press
+  std::array<bool, 5> selectedTypes;
 
   std::size_t updatesSinceLastFrame;
 
 
-  void handleKey(GLFWwindow *window, Key key);
+  void handleKey(Display const &, GLFWwindow *window, Key key);
   void handleMouse(Display const &, GLFWwindow *window, Mouse mouse);
   void handleButton(GLFWwindow *window, Button button, Display const &);
   void selectBots(Display const &);
   void selectRect(claws::Vect<2u, double> start, claws::Vect<2u, double> end);
+  void refreshSelection();
+  void selectAllBots();
+  void selectType(std::array<bool, 5> const& types);
 
 public:
   Logic(bool animation = true);
 
   void handleEvent(Display const &, Event const& event);
-  void checkEvents(Display const &);
+  void checkEvents(Display const &, unsigned tick);
   void selectRect(claws::Vect<2u, double>, claws::Vect<2u, double>, claws::Vect<4u, bool>);
-  void update(Camera const &);
+  void update(Display&);
   void moveSelection(claws::Vect<2u, double> target);
-  void tick(std::mutex &lock, Camera const &);
+  void tick(std::mutex &lock, Display&);
   void addToScore(int);
   void addToTimer(unsigned int);
   void createBot(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed, bool ally, NanoBot::Type type);

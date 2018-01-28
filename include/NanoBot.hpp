@@ -5,6 +5,7 @@
 #include "Entity.hpp"
 #include "TextureHandler.hpp"
 
+class EntityManager;
 class Logic;
 
 class NanoBot : public Entity
@@ -16,7 +17,7 @@ public:
   bool hasPlayed;
   using CollisionContainer = std::map<Entity *, std::set<Entity *>>;
 
-  enum class Type : std::size_t
+  enum Type : std::size_t
   {
     WORKER,
     BRUTE,
@@ -32,6 +33,9 @@ public:
     type(type)
   {
   }
+
+  void update();
+  void ia(EntityManager& em);
 
   void workerAction(CollisionContainer &, Logic &);
   void bruteAction(CollisionContainer &, Logic &);
