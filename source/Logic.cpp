@@ -40,6 +40,7 @@ Logic::Logic(bool animation)
 	entityManager.allies.batteries[i * 10 + j].fixture.speed = {0.0, 0.0};
 	entityManager.allies.batteries[i * 10 + j].fixture.target = entityManager.allies.batteries[i * 10 + j].fixture.pos;
       }
+  createPylone(claws::Vect<2u, double>{0.045 - 0.3, 0.045 - 1.0});
 }
 
 template<class ...T, class Func>
@@ -170,6 +171,7 @@ void Logic::tick(std::mutex &lock, Display& display)
     }
   else
     --spawnDelay;
+  spawnPylone(display.getCamera());
 
   auto const now(Clock::now());
 
@@ -204,63 +206,64 @@ void Logic::createBot(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed
     entityManager.allies.units.emplace_back(type);
 	  entityManager.allies.units.back().fixture.pos = pos;
 	  entityManager.allies.units.back().fixture.speed = speed;
-	  entityManager.allies.units.back().fixture.target = entityManager.allies.units.back().fixture.pos * 0.5;
+	  entityManager.allies.units.back().fixture.target = entityManager.allies.units.back().fixture.pos;
   }
   else
   {
     entityManager.ennemies.units.emplace_back(type);
 	  entityManager.ennemies.units.back().fixture.pos = pos;
 	  entityManager.ennemies.units.back().fixture.speed = speed;
-	  entityManager.ennemies.units.back().fixture.target = entityManager.ennemies.units.back().fixture.pos * 0.5;
+	  entityManager.ennemies.units.back().fixture.target = entityManager.ennemies.units.back().fixture.pos;
   }
-  // add score
-  /*if (ally)
-    {
-      ++nbAlly;
-      score.score += Score::BOT_CREATED;
-      score.botCreated += 1;
-    }*/
 }
 
-void Logic::createBatteries(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed, bool ally)
+void Logic::createBatterie(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed, bool ally)
 {
   if (ally)
   {
     entityManager.allies.batteries.emplace_back(10);
 	  entityManager.allies.batteries.back().fixture.pos = pos;
 	  entityManager.allies.batteries.back().fixture.speed = speed;
-	  entityManager.allies.batteries.back().fixture.target = entityManager.allies.batteries.back().fixture.pos * 0.5;
+	  entityManager.allies.batteries.back().fixture.target = entityManager.allies.batteries.back().fixture.pos;
   }
   else
   {
     entityManager.ennemies.batteries.emplace_back(10);
 	  entityManager.ennemies.batteries.back().fixture.pos = pos;
 	  entityManager.ennemies.batteries.back().fixture.speed = speed;
-	  entityManager.ennemies.batteries.back().fixture.target = entityManager.ennemies.batteries.back().fixture.pos * 0.5;
+	  entityManager.ennemies.batteries.back().fixture.target = entityManager.ennemies.batteries.back().fixture.pos;
   }
-  // add score
-  /*if (ally)
-    {
-      ++nbAlly;
-      score.score += Score::BOT_CREATED;
-      score.botCreated += 1;
-    }*/
+}
+
+void Logic::createPylone(claws::Vect<2u, double> pos)
+{
+  entityManager.pylones.emplace_back(100);
+	entityManager.pylones.back().fixture.pos = pos;
 }
 
 void Logic::spawnEnemies(Camera const &camera)
 {
   claws::Vect<2u, double> spawnCenter((claws::Vect<2u, double>{sin(level * level), cos(level * level)} - camera.offset) * 3.0 / camera.zoom);
 
-  std::cout << "X: " << spawnCenter[0] << "        Y: " << spawnCenter[1] << std::endl;
+  //std::cout << "X: " << spawnCenter[0] << "        Y: " << spawnCenter[1] << std::endl;
   unsigned int i(0);
   for (i = 0; i < (10 + level) / 3; i++)
     createBot(claws::Vect<2u, double>{(i % 5) * 0.05, (i / 5) * 0.05} + spawnCenter,
               {0.0, 0.0},
 	            false,
               NanoBot::Type::BRUTE);
-  createBatteries(claws::Vect<2u, double>{(i % 5) * 0.05, (i / 5) * 0.05} + spawnCenter,
+  createBatterie(claws::Vect<2u, double>{(i % 5) * 0.05, (i / 5) * 0.05} + spawnCenter,
             {0.0, 0.0},
 	          false);
+}
+
+void Logic::spawnPylone(Camera const &camera)
+{
+  if (entityManager.pylones.back().getPower() <= 10)
+  {
+    claws::Vect<2u, double> spawnCenter((claws::Vect<2u, double>{sin(level * level), cos(level * level)} - camera.offset) * 3.0 / camera.zoom);
+    createPylone(claws::Vect<2u, double>{(1 % 5) * 0.05, (1 / 5) * 0.05} + spawnCenter);
+  }
 }
 
 std::string Logic::getScore(void) const

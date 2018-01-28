@@ -81,8 +81,10 @@ public:
   void addToScore(int);
   void addToTimer(unsigned int);
   void createBot(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed, bool ally, NanoBot::Type type);
-  void createBatteries(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed, bool ally);
+  void createBatterie(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed, bool ally);
+  void createPylone(claws::Vect<2u, double> pos);
   void spawnEnemies(Camera const &camera);
+  void spawnPylone(Camera const &camera);
 
   template<class... Args>
   void addLaser(Args &&...args)
