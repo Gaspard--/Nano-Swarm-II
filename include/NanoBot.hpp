@@ -5,6 +5,7 @@
 #include "Entity.hpp"
 #include "TextureHandler.hpp"
 
+class EntityManager;
 class Logic;
 
 class NanoBot : public Entity
@@ -26,6 +27,8 @@ public:
   Type type;
 
   NanoBot(Type type);
+  void update();
+  void ia(EntityManager& em);
 
   void workerAction(CollisionContainer &, Logic &);
   void bruteAction(CollisionContainer &, Logic &);
