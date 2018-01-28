@@ -76,6 +76,7 @@ public:
   void addToScore(int);
   void addToTimer(unsigned int);
   void createBot(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed, bool ally, NanoBot::Type type);
+  void createBatteries(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed, bool ally);
   void spawnEnemies(Camera const &camera);
 
   template<class... Args>

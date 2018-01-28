@@ -215,16 +215,45 @@ void Logic::createBot(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed
     }*/
 }
 
+void Logic::createBatteries(claws::Vect<2u, double> pos, claws::Vect<2u, double> speed, bool ally)
+{
+  if (ally)
+  {
+    entityManager.allies.batteries.emplace_back(10);
+	  entityManager.allies.batteries.back().fixture.pos = pos;
+	  entityManager.allies.batteries.back().fixture.speed = speed;
+	  entityManager.allies.batteries.back().fixture.target = entityManager.allies.batteries.back().fixture.pos * 0.5;
+  }
+  else
+  {
+    entityManager.ennemies.batteries.emplace_back(10);
+	  entityManager.ennemies.batteries.back().fixture.pos = pos;
+	  entityManager.ennemies.batteries.back().fixture.speed = speed;
+	  entityManager.ennemies.batteries.back().fixture.target = entityManager.ennemies.batteries.back().fixture.pos * 0.5;
+  }
+  // add score
+  /*if (ally)
+    {
+      ++nbAlly;
+      score.score += Score::BOT_CREATED;
+      score.botCreated += 1;
+    }*/
+}
+
 void Logic::spawnEnemies(Camera const &camera)
 {
   claws::Vect<2u, double> spawnCenter((claws::Vect<2u, double>{sin(level * level), cos(level * level)} - camera.offset) * 3.0 / camera.zoom);
 
   std::cout << "X: " << spawnCenter[0] << "        Y: " << spawnCenter[1] << std::endl;
-  for (unsigned int i(0); i < (10 + level) / 3; i++)
+  unsigned int i(0);
+  for (i = 0; i < (10 + level) / 3; i++)
     createBot(claws::Vect<2u, double>{(i % 5) * 0.05, (i / 5) * 0.05} + spawnCenter,
               {0.0, 0.0},
 	            false,
               NanoBot::Type::BRUTE);
+  createBatteries(claws::Vect<2u, double>{(i % 5) * 0.05, (i / 5) * 0.05} + spawnCenter,
+            {0.0, 0.0},
+	          false);
 }
 
 std::string Logic::getScore(void) const
