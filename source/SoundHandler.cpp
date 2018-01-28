@@ -12,7 +12,7 @@ SoundHandler::SoundHandler()
 void SoundHandler::initSoundHandler()
 {
   _instance.reset(new SoundHandler());
-  if (!_instance->mainMusic.openFromFile("resources/Ken_new_Hope_(loop).wav"))
+  if (!_instance->mainMusic.openFromFile("resources/storm.wav"))
     throw std::runtime_error("Music not charged");
 }
 
